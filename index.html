@@ -998,35 +998,52 @@ function renderScheduleTable(){
 // D-Day
 // ════════════════════════════════════════════════════════
 function openDDayModal(){
-  document.getElementById('ddayDateInfo').textContent='오늘: '+(today.getMonth()+1)+'월 '+today.getDate()+'일 ('+['일','월','화','수','목','금','토'][today.getDay()]+')';
+  // 이번 주 일요일~토요일 범위 계산
+  const todayMid=new Date(today.getFullYear(),today.getMonth(),today.getDate());
+  const dow=todayMid.getDay(); // 0=일
+  const weekStart=new Date(todayMid); weekStart.setDate(todayMid.getDate()-dow); // 이번주 일요일
+  const weekEnd=new Date(weekStart); weekEnd.setDate(weekStart.getDate()+6); // 이번주 토요일
+  const weekEndStr=fmtDate(weekEnd);
+  const todayStr=fmtDate(todayMid);
+
+  document.getElementById('ddayDateInfo').textContent=
+    '오늘: '+(today.getMonth()+1)+'월 '+today.getDate()+'일 ('+['일','월','화','수','목','금','토'][today.getDay()]+')  '
+    +'이번 주: '+(weekStart.getMonth()+1)+'/'+weekStart.getDate()+' ~ '+(weekEnd.getMonth()+1)+'/'+weekEnd.getDate();
+
   const list=document.getElementById('ddayList');list.innerHTML='';
   const upcoming=[];
-  // 일반 일정
+
+  // 이번 주 일정 (오늘 이후만)
   Object.entries(events).forEach(([dk,evs])=>{
-    const d=new Date(dk);const diff=Math.ceil((d-today)/86400000);
-    if(diff>=-1&&diff<=30)evs.forEach(ev=>{
-      if(ev.type==='마감'){upcoming.push({...ev,diff,_d:d,isDl:true});}
-      else if(ev.flagType==='deadline'||ev.flagType==='alert'||(ev.memo&&ev.memo.trim()))upcoming.push({...ev,diff,_d:d});
+    if(dk<todayStr||dk>weekEndStr)return; // 오늘 이전 또는 이번주 이후 제외
+    const d=new Date(dk);
+    const diff=Math.ceil((d-todayMid)/86400000);
+    evs.forEach(ev=>{
+      upcoming.push({...ev,diff,_d:d,isDl:ev.type==='마감'});
     });
   });
-  Object.entries(events).forEach(([dk,evs])=>{
-    const d=new Date(dk);const diff=Math.ceil((d-today)/86400000);
-    if(diff>=0&&diff<=7)evs.forEach(ev=>{if(!upcoming.find(u=>u.id===ev.id))upcoming.push({...ev,diff,_d:d});});
-  });
-  // 마감일
+
+  // 이번 주 마감일 (오늘 이후만)
   deadlines.forEach(dl=>{
-    const d=new Date(dl.date);const diff=Math.ceil((d-today)/86400000);
-    if(diff>=-1&&diff<=30&&!upcoming.find(u=>u.id==='dl-'+dl.id))
+    if(dl.date<todayStr||dl.date>weekEndStr)return;
+    const d=new Date(dl.date);
+    const diff=Math.ceil((d-todayMid)/86400000);
+    if(!upcoming.find(u=>u.id==='dl-'+dl.id))
       upcoming.push({id:'dl-'+dl.id,title:dl.title,date:dl.date,diff,_d:d,isDl:true,type:'마감',time:'',court:'',caseNo:dl.caseNo,memo:'',plaintiff:'',defendant:''});
   });
-  upcoming.sort((a,b)=>a.diff-b.diff);
-  if(upcoming.length===0){list.innerHTML='<div class="dday-none">향후 30일 이내 특이 알림 일정이 없습니다</div>';document.getElementById('ddayModal').classList.add('show');return;}
+
+  upcoming.sort((a,b)=>a.diff-b.diff||( a.time||'').localeCompare(b.time||''));
+
+  if(upcoming.length===0){
+    list.innerHTML='<div class="dday-none">이번 주 남은 일정이 없습니다 😊</div>';
+    document.getElementById('ddayModal').classList.add('show');return;
+  }
   upcoming.forEach(ev=>{
     const item=document.createElement('div');
-    item.className='dday-item'+(ev.isDl?' deadline-item':ev.diff<=2?' urgent':ev.diff<=7?' warning':'');
-    const ddayText=ev.diff===0?'D-Day':ev.diff<0?'D+'+Math.abs(ev.diff):'D-'+ev.diff;
+    item.className='dday-item'+(ev.isDl?' deadline-item':ev.diff===0?' urgent':ev.diff<=2?' warning':'');
+    const ddayText=ev.diff===0?'D-Day':'D-'+ev.diff;
     const label=ev.title||(getOpponent(ev)||'')+' '+(ev.type||'');
-    item.innerHTML=`<div class="dday-badge">${ddayText}</div><div class="dday-item-info"><div class="dday-item-title">${escHtml(label.trim())} ${ev.time?'('+ev.time+')':''}</div><div class="dday-item-desc">${ev._d.getMonth()+1}/${ev._d.getDate()}${ev.court?' · '+escHtml(ev.court):''}${ev.caseNo?' '+escHtml(ev.caseNo):''}</div>${ev.memo?'<div class="dday-item-desc" style="color:#c0392b;margin-top:2px">📌 '+escHtml(ev.memo)+'</div>':''}</div>`;
+    item.innerHTML=`<div class="dday-badge">${ddayText}</div><div class="dday-item-info"><div class="dday-item-title">${escHtml(label.trim())} ${ev.time?'('+ev.time+')':''}</div><div class="dday-item-desc">${ev._d.getMonth()+1}/${ev._d.getDate()} (${['일','월','화','수','목','금','토'][ev._d.getDay()]})${ev.court?' · '+escHtml(ev.court):''}${ev.caseNo?' '+escHtml(ev.caseNo):''}</div>${ev.memo?'<div class="dday-item-desc" style="color:#c0392b;margin-top:2px">📌 '+escHtml(ev.memo)+'</div>':''}</div>`;
     list.appendChild(item);
   });
   document.getElementById('ddayModal').classList.add('show');
