@@ -2,163 +2,256 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>재판 일정 관리</title>
-<!-- 아이폰 홈화면 아이콘 -->
-<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF0WlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDUgNzkuMTYzNDk5LCAyMDE4LzA4LzEzLTE2OjQwOjIyICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIiB4bWxuczpzdFJlZj0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlUmVmIyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NkI4NjU1NjI3NTlDMTFFOUJFNDlDMTgzODg1NzVGNkQiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NkI4NjU1NjM3NTlDMTFFOUJFNDlDMTgzODg1NzVGNkQiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo2Qjg2NTU2MDc1OUMxMUU5QkU0OUMxODM4ODU3NUY2RCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo2Qjg2NTU2MTc1OUMxMUU5QkU0OUMxODM4ODU3NUY2RCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Pn6FzWcAAAMbSURBVHja7NtBCsIwEEDRqnj/K3sQPEoX0aRJZt77sIuW8iBk0gIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="재판일정">
+<!-- 아이폰 아이콘: canvas로 동적 생성 후 주입 -->
+<script>
+(function(){
+  const c=document.createElement('canvas');c.width=180;c.height=180;
+  const ctx=c.getContext('2d');
+  const r=22;ctx.beginPath();ctx.moveTo(r,0);ctx.lineTo(180-r,0);ctx.quadraticCurveTo(180,0,180,r);
+  ctx.lineTo(180,180-r);ctx.quadraticCurveTo(180,180,180-r,180);ctx.lineTo(r,180);
+  ctx.quadraticCurveTo(0,180,0,180-r);ctx.lineTo(0,r);ctx.quadraticCurveTo(0,0,r,0);
+  ctx.closePath();ctx.fillStyle='#1a1a2e';ctx.fill();
+  ctx.font='bold 28px serif';ctx.fillStyle='#c9a84c';ctx.textAlign='center';
+  ctx.fillText('재판',90,75);ctx.fillText('일정',90,108);
+  ctx.font='36px serif';ctx.fillText('⚖',90,150);
+  const link=document.createElement('link');link.rel='apple-touch-icon';link.href=c.toDataURL('image/png');
+  document.head.appendChild(link);
+})();
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
-:root {
-  --ink: #1a1a2e; --ink-light: #2d2d4e; --gold: #c9a84c; --gold-light: #e8c97a;
-  --red: #c0392b; --paper: #faf8f3; --paper-dark: #f0ece0;
-  --border: #d4c9a8; --border-dark: #b8a87a; --muted: #7a7565; --white: #ffffff;
-  --shadow: rgba(26,26,46,0.12); --today-border: #c0392b;
+:root{--ink:#1a1a2e;--ink-light:#2d2d4e;--gold:#c9a84c;--gold-light:#e8c97a;--red:#c0392b;--paper:#faf8f3;--paper-dark:#f0ece0;--border:#d4c9a8;--border-dark:#b8a87a;--muted:#7a7565;--white:#fff;--shadow:rgba(26,26,46,0.12);--today-border:#c0392b;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--ink);min-height:100vh;color:var(--ink);}
+.app-wrapper{display:flex;flex-direction:column;min-height:100vh;background:linear-gradient(160deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%);}
+.app-header{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:rgba(255,255,255,0.04);border-bottom:1px solid rgba(201,168,76,0.3);backdrop-filter:blur(8px);flex-wrap:wrap;gap:6px;}
+.app-logo{font-family:'Noto Serif KR',serif;font-size:1.2rem;font-weight:700;color:var(--gold);}
+.app-logo span{color:rgba(255,255,255,0.6);font-weight:300;font-size:0.8rem;margin-left:8px;}
+/* 검색창 */
+.search-wrap{position:relative;display:flex;align-items:center;}
+.search-input{background:rgba(255,255,255,0.08);border:1px solid rgba(201,168,76,0.25);border-radius:20px;padding:6px 14px 6px 34px;color:rgba(255,255,255,0.85);font-family:'Noto Sans KR',sans-serif;font-size:0.78rem;width:220px;transition:all 0.2s;outline:none;}
+.search-input::placeholder{color:rgba(255,255,255,0.35);}
+.search-input:focus{border-color:rgba(201,168,76,0.6);background:rgba(255,255,255,0.12);width:260px;}
+.search-icon{position:absolute;left:10px;color:rgba(201,168,76,0.6);font-size:0.85rem;pointer-events:none;}
+.search-dropdown{display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--paper);border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.3);z-index:500;max-height:320px;overflow-y:auto;}
+.search-dropdown.show{display:block;}
+.search-result-item{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s;}
+.search-result-item:hover{background:var(--paper-dark);}
+.search-result-item:last-child{border-bottom:none;}
+.sri-case{font-size:0.78rem;font-weight:700;color:var(--ink);}
+.sri-parties{font-size:0.72rem;color:var(--muted);margin-top:2px;}
+.sri-count{font-size:0.68rem;color:var(--gold);margin-top:1px;}
+.search-empty{padding:14px;text-align:center;color:var(--muted);font-size:0.78rem;}
+/* 사건 이력 모달 */
+.case-modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,10,30,0.8);z-index:3000;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.case-modal-overlay.show{display:flex;}
+.case-modal-box{background:var(--paper);border-radius:12px;padding:0;width:520px;max-width:95vw;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 24px 72px rgba(0,0,0,0.5);border:1px solid var(--border);}
+.case-modal-head{background:var(--ink);padding:16px 20px;border-radius:12px 12px 0 0;border-bottom:2px solid var(--gold);display:flex;align-items:flex-start;justify-content:space-between;}
+.case-modal-head-info{flex:1;}
+.case-modal-caseNo{font-family:'Noto Serif KR',serif;font-size:1rem;font-weight:700;color:var(--gold);}
+.case-modal-parties{font-size:0.78rem;color:rgba(255,255,255,0.6);margin-top:4px;}
+.case-modal-close{background:none;border:none;color:rgba(255,255,255,0.5);font-size:1.2rem;cursor:pointer;padding:0 0 0 12px;}
+.case-modal-body{flex:1;overflow-y:auto;padding:16px 20px;}
+.case-modal-body::-webkit-scrollbar{width:4px;}
+.case-modal-body::-webkit-scrollbar-thumb{background:var(--border-dark);border-radius:2px;}
+.case-timeline{display:flex;flex-direction:column;gap:0;}
+.timeline-item{display:flex;gap:14px;padding:10px 0;border-bottom:1px solid var(--border);}
+.timeline-item:last-child{border-bottom:none;}
+.timeline-dot{display:flex;flex-direction:column;align-items:center;gap:0;}
+.tl-dot{width:10px;height:10px;border-radius:50%;background:var(--gold);margin-top:4px;flex-shrink:0;}
+.tl-dot.type-변론{background:#c0392b;}
+.tl-dot.type-조정{background:#2980b9;}
+.tl-dot.type-선고{background:#8e44ad;}
+.tl-dot.type-마감{background:#e67e22;}
+.tl-line{width:1px;flex:1;background:var(--border);margin-top:3px;}
+.timeline-content{flex:1;}
+.tl-date{font-size:0.72rem;color:var(--muted);}
+.tl-type{font-size:0.82rem;font-weight:700;color:var(--ink);margin-top:1px;}
+.tl-loc{font-size:0.72rem;color:var(--muted);}
+.tl-status{font-size:0.75rem;color:var(--ink);margin-top:3px;background:var(--paper-dark);padding:3px 7px;border-radius:4px;display:inline-block;}
+.tl-memo{font-size:0.72rem;color:#c0392b;margin-top:2px;}
+.header-actions{display:flex;gap:7px;flex-wrap:wrap;}
+.btn-add{background:var(--gold);color:var(--ink);border:none;padding:6px 14px;border-radius:4px;font-family:'Noto Sans KR',sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;transition:background 0.2s;}
+.btn-add:hover{background:var(--gold-light);}
+.main-area{display:flex;flex:1;gap:0;padding:16px 16px 0;min-height:0;}
+.calendar-panel{flex:1;display:flex;flex-direction:column;background:var(--paper);border-radius:8px 0 0 0;overflow:hidden;box-shadow:0 8px 32px var(--shadow);}
+.cal-header{background:var(--ink);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--gold);}
+.cal-title{font-family:'Noto Serif KR',serif;font-size:1.35rem;font-weight:700;color:var(--gold);cursor:pointer;user-select:none;display:flex;align-items:center;gap:6px;}
+.cal-title:hover{color:var(--gold-light);}
+.cal-nav{display:flex;gap:5px;}
+.cal-nav-btn{background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);color:var(--gold);width:30px;height:30px;border-radius:4px;font-size:0.9rem;cursor:pointer;transition:background 0.2s;display:flex;align-items:center;justify-content:center;}
+.cal-nav-btn:hover{background:rgba(201,168,76,0.3);}
+/* 달력 그리드 - 고정 높이로 균일하게 */
+.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);background:var(--ink-light);}
+.cal-weekday{text-align:center;padding:6px 0;font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.6);}
+.cal-weekday:first-child{color:#e57373;}
+.cal-weekday:last-child{color:#7ba7d4;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:1fr;border-left:1px solid var(--border);border-top:1px solid var(--border);background:var(--paper);overflow:hidden;}
+.cal-cell{border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:4px;background:var(--paper);transition:background 0.15s;cursor:pointer;overflow:hidden;display:flex;flex-direction:column;}
+.cal-cell:hover{background:#f5f0e4;}
+.cal-cell.other-month{background:#f7f4ed;opacity:0.6;}
+.cal-cell.today{outline:2.5px solid var(--today-border);outline-offset:-2px;background:#fff5f5;z-index:1;}
+.cal-cell.selected{background:#eef3fb;outline:2px solid #4a7bc4;outline-offset:-2px;}
+.cal-cell.past-day{background:#f4f4f0 !important;}
+.cal-cell.past-day .day-num{color:#bbb !important;}
+.day-num{font-size:0.75rem;font-weight:700;color:var(--ink);margin-bottom:2px;display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;}
+.cal-cell.today .day-num{background:var(--today-border);color:white;border-radius:50%;width:20px;}
+.cal-cell[data-dow="0"] .day-num{color:#c0392b;}
+.cal-cell[data-dow="6"] .day-num{color:#2980b9;}
+.cell-events{display:flex;flex-direction:column;gap:1px;flex:1;overflow:hidden;}
+.cell-event{font-size:0.62rem;padding:1px 3px;border-radius:2px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:2px solid var(--gold);background:rgba(201,168,76,0.1);color:var(--ink);line-height:1.5;}
+.cell-event:hover{opacity:0.8;}
+.cell-event.type-변론{border-left-color:#c0392b;background:rgba(192,57,43,0.08);}
+.cell-event.type-조정{border-left-color:#2980b9;background:rgba(41,128,185,0.08);}
+.cell-event.type-선고{border-left-color:#8e44ad;background:rgba(142,68,173,0.08);}
+.cell-event.type-기타{border-left-color:#27ae60;background:rgba(39,174,96,0.08);}
+.cell-event.type-마감{border-left-color:#e67e22;background:rgba(230,126,34,0.1);color:#c0392b;font-weight:700;}
+.cell-event.past{border-left-color:#aaa !important;background:rgba(150,150,150,0.07) !important;color:#999 !important;text-decoration:line-through;}
+.cell-more{font-size:0.58rem;color:var(--muted);cursor:pointer;}
+
+/* 우측 상세 패널 */
+.detail-panel{width:300px;background:var(--paper-dark);border-left:1px solid var(--border);border-radius:0 8px 0 0;display:flex;flex-direction:column;overflow:hidden;}
+.detail-header{background:var(--ink-light);padding:10px 14px;border-bottom:2px solid var(--gold);display:flex;align-items:center;justify-content:space-between;}
+.detail-title{font-family:'Noto Serif KR',serif;color:var(--gold);font-size:0.9rem;font-weight:700;}
+.detail-date-label{font-size:0.7rem;color:rgba(255,255,255,0.5);}
+.detail-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--paper);}
+.detail-tab{flex:1;padding:7px 0;text-align:center;font-size:0.73rem;font-weight:700;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all 0.2s;}
+.detail-tab.active{color:var(--ink);border-bottom-color:var(--gold);}
+.detail-body{flex:1;overflow-y:auto;padding:12px;}
+.detail-body::-webkit-scrollbar{width:3px;}
+.detail-body::-webkit-scrollbar-thumb{background:var(--border-dark);border-radius:2px;}
+.form-group{margin-bottom:9px;}
+.form-label{display:block;font-size:0.68rem;font-weight:700;color:var(--muted);margin-bottom:3px;letter-spacing:0.04em;}
+.form-control{width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:4px;background:var(--white);font-family:'Noto Sans KR',sans-serif;font-size:0.76rem;color:var(--ink);}
+.form-control:focus{outline:none;border-color:var(--gold);}
+textarea.form-control{resize:vertical;min-height:50px;}
+.detail-actions{padding:9px 12px;border-top:1px solid var(--border);display:flex;gap:7px;}
+.btn-save{flex:1;background:var(--gold);color:var(--ink);border:none;padding:7px;border-radius:4px;font-family:'Noto Sans KR',sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;}
+.btn-save:hover{background:var(--gold-light);}
+.btn-delete{background:rgba(192,57,43,0.1);color:var(--red);border:1px solid rgba(192,57,43,0.3);padding:7px 11px;border-radius:4px;font-size:0.78rem;cursor:pointer;}
+.btn-new{background:rgba(74,123,196,0.1);color:#4a7bc4;border:1px solid rgba(74,123,196,0.3);padding:7px 11px;border-radius:4px;font-size:0.78rem;cursor:pointer;}
+.detail-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:0.8rem;text-align:center;gap:8px;padding:24px;}
+.detail-empty-icon{font-size:2rem;opacity:0.4;}
+.section-divider{border:none;border-top:1px solid var(--border);margin:6px 0 9px;}
+
+/* 사건 이력 패널 */
+.case-history{background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.2);border-radius:6px;padding:8px 10px;margin-bottom:9px;font-size:0.72rem;}
+.case-history-title{font-weight:700;color:var(--gold);margin-bottom:5px;font-size:0.73rem;}
+.case-history-item{padding:3px 0;border-bottom:1px solid var(--border);color:var(--ink);line-height:1.4;}
+.case-history-item:last-child{border-bottom:none;}
+.case-history-date{color:var(--muted);font-size:0.67rem;}
+
+/* 마감일 섹션 */
+.deadline-section{background:rgba(230,126,34,0.06);border:1px solid rgba(230,126,34,0.2);border-radius:6px;padding:8px 10px;margin-bottom:9px;}
+.deadline-title{font-size:0.7rem;font-weight:700;color:#e67e22;margin-bottom:6px;}
+.deadline-row{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+.deadline-row label{font-size:0.68rem;color:var(--muted);min-width:80px;}
+
+/* 하단 테이블 */
+.schedule-table-wrap{background:var(--paper);margin:0 16px;border-radius:0 0 8px 8px;overflow:hidden;box-shadow:0 8px 24px var(--shadow);margin-bottom:16px;}
+.schedule-table-header{background:var(--ink);padding:9px 16px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(201,168,76,0.2);}
+.schedule-table-title{font-family:'Noto Serif KR',serif;color:var(--gold);font-size:0.88rem;font-weight:700;}
+.schedule-table-wrap table{width:100%;border-collapse:collapse;font-size:0.71rem;}
+.schedule-table-wrap th{background:var(--ink-light);color:rgba(255,255,255,0.75);padding:6px 7px;text-align:center;font-weight:600;white-space:nowrap;border-right:1px solid rgba(255,255,255,0.07);}
+.schedule-table-wrap td{padding:5px 7px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);text-align:center;vertical-align:middle;color:var(--ink);}
+.schedule-table-wrap tr:hover td{background:#f5f0e4;cursor:pointer;}
+.badge{display:inline-block;padding:1px 6px;border-radius:10px;font-size:0.66rem;font-weight:700;}
+.badge-변론{background:rgba(192,57,43,0.12);color:#c0392b;}
+.badge-조정{background:rgba(41,128,185,0.12);color:#2980b9;}
+.badge-선고{background:rgba(142,68,173,0.12);color:#8e44ad;}
+.badge-기타{background:rgba(39,174,96,0.12);color:#27ae60;}
+.badge-위임Y{background:rgba(39,174,96,0.12);color:#27ae60;}
+.badge-위임N{background:rgba(192,57,43,0.1);color:#c0392b;}
+.empty-row td{color:var(--muted);font-style:italic;}
+
+/* 모달 공통 */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,10,30,0.7);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.modal-overlay.show{display:flex;}
+.modal-box{background:var(--paper);border-radius:10px;padding:22px;min-width:300px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,0.5);border:1px solid var(--border);}
+.modal-title{font-family:'Noto Serif KR',serif;font-size:1.05rem;font-weight:700;color:var(--ink);margin-bottom:16px;text-align:center;}
+.modal-actions{display:flex;gap:9px;margin-top:14px;}
+.btn-confirm{flex:1;background:var(--gold);color:var(--ink);border:none;padding:9px;border-radius:4px;font-weight:700;font-size:0.83rem;cursor:pointer;font-family:'Noto Sans KR',sans-serif;}
+.btn-cancel{flex:1;background:var(--paper-dark);color:var(--muted);border:1px solid var(--border);padding:9px;border-radius:4px;font-weight:700;font-size:0.83rem;cursor:pointer;font-family:'Noto Sans KR',sans-serif;}
+
+/* D-Day 모달 */
+.dday-modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,10,30,0.85);z-index:2000;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
+.dday-modal-overlay.show{display:flex;}
+.dday-box{background:var(--paper);border-radius:12px;padding:24px 28px 20px;min-width:360px;max-width:90vw;max-height:85vh;overflow-y:auto;box-shadow:0 24px 72px rgba(0,0,0,0.6);border:2px solid var(--gold);}
+.dday-header{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.dday-icon{font-size:1.8rem;}
+.dday-head-text h2{font-family:'Noto Serif KR',serif;font-size:1.15rem;font-weight:700;color:var(--ink);}
+.dday-head-text p{font-size:0.75rem;color:var(--muted);margin-top:2px;}
+.dday-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.dday-item{display:flex;align-items:flex-start;gap:10px;background:var(--paper-dark);border-radius:7px;padding:10px 12px;border-left:4px solid var(--gold);}
+.dday-item.urgent{border-left-color:var(--red);}
+.dday-item.warning{border-left-color:#e67e22;}
+.dday-item.deadline-item{border-left-color:#e67e22;background:rgba(230,126,34,0.06);}
+.dday-badge{font-size:0.72rem;font-weight:700;min-width:48px;text-align:center;padding:2px 7px;border-radius:10px;background:var(--ink);color:var(--gold);white-space:nowrap;}
+.dday-item.urgent .dday-badge{background:var(--red);color:white;}
+.dday-item.warning .dday-badge,.dday-item.deadline-item .dday-badge{background:#e67e22;color:white;}
+.dday-item-info{flex:1;}
+.dday-item-title{font-size:0.82rem;font-weight:700;color:var(--ink);}
+.dday-item-desc{font-size:0.72rem;color:var(--muted);margin-top:2px;}
+.dday-close{width:100%;background:var(--gold);color:var(--ink);border:none;padding:10px;border-radius:6px;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:'Noto Sans KR',sans-serif;}
+.dday-none{text-align:center;color:var(--muted);padding:16px 0;font-size:0.82rem;}
+
+/* 중복 사건 팝업 */
+.case-dup-modal{display:none;position:fixed;inset:0;background:rgba(10,10,30,0.75);z-index:3000;align-items:center;justify-content:center;}
+.case-dup-modal.show{display:flex;}
+.case-dup-box{background:var(--paper);border-radius:10px;padding:20px;max-width:420px;width:90vw;border:2px solid var(--gold);box-shadow:0 16px 48px rgba(0,0,0,0.5);}
+.case-dup-title{font-family:'Noto Serif KR',serif;font-size:1rem;font-weight:700;color:var(--ink);margin-bottom:10px;}
+.case-dup-msg{font-size:0.8rem;color:var(--muted);margin-bottom:10px;line-height:1.5;}
+.case-dup-prev{background:var(--paper-dark);border-radius:6px;padding:8px 10px;font-size:0.75rem;margin-bottom:12px;border-left:3px solid var(--gold);}
+
+/* 인라인 붙여넣기 */
+.inline-paste-area{display:flex;flex-direction:column;gap:9px;}
+.inline-paste-area textarea{min-height:110px;font-size:0.73rem;}
+
+/* 모바일 */
+.mobile-detail-overlay{display:none;position:fixed;inset:0;background:rgba(10,10,30,0.6);z-index:500;}
+.mobile-detail-sheet{position:fixed;bottom:0;left:0;right:0;background:var(--paper-dark);border-radius:16px 16px 0 0;max-height:88vh;overflow-y:auto;z-index:501;transform:translateY(100%);transition:transform 0.3s ease;}
+.mobile-detail-sheet.open{transform:translateY(0);}
+.mobile-sheet-handle{width:36px;height:4px;background:var(--border-dark);border-radius:2px;margin:10px auto 0;}
+.mobile-fab{display:none;position:fixed;bottom:72px;right:18px;width:50px;height:50px;background:var(--gold);border-radius:50%;border:none;font-size:1.4rem;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.3);z-index:400;align-items:center;justify-content:center;color:var(--ink);font-weight:700;}
+.mobile-bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--ink);border-top:1px solid rgba(201,168,76,0.3);padding:7px 0 env(safe-area-inset-bottom);z-index:300;justify-content:space-around;}
+.mobile-nav-btn{background:none;border:none;color:rgba(255,255,255,0.5);font-size:0.62rem;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:3px 7px;font-family:'Noto Sans KR',sans-serif;}
+.mobile-nav-btn .nav-icon{font-size:1.1rem;}
+.mobile-nav-btn.active{color:var(--gold);}
+
+@media(max-width:768px){
+  .app-header{padding:9px 12px;}
+  .app-logo{font-size:1rem;}
+  .app-logo span{display:none;}
+  .header-actions{display:none;}
+  .btn-desktop-only{display:none !important;}
+  .search-input{width:160px;font-size:0.73rem;}
+  .search-input:focus{width:180px;}
+  .main-area{padding:6px 6px 0;flex-direction:column;}
+  .calendar-panel{border-radius:8px;}
+  .detail-panel{display:none;}
+  /* 모바일 달력: 고정 grid로 균일하게 */
+  .cal-grid{grid-auto-rows:minmax(52px,1fr);}
+  .cal-cell{min-height:52px;padding:2px;}
+  .cell-event{font-size:0.56rem;padding:1px 2px;}
+  .day-num{font-size:0.68rem;}
+  .cal-weekday{font-size:0.65rem;padding:5px 0;}
+  .schedule-table-wrap{margin:5px 6px 70px;border-radius:8px;}
+  .schedule-table-wrap table{font-size:0.62rem;}
+  .schedule-table-wrap th,.schedule-table-wrap td{padding:4px;}
+  .mobile-detail-overlay{display:block;}
+  .mobile-fab{display:flex;}
+  .mobile-bottom-nav{display:flex;}
+  .modal-box{min-width:88vw !important;}
+  .dday-box{min-width:88vw !important;}
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Noto Sans KR', sans-serif; background: var(--ink); min-height: 100vh; color: var(--ink); }
-.app-wrapper { display: flex; flex-direction: column; min-height: 100vh; background: linear-gradient(160deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%); }
-.app-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; background: rgba(255,255,255,0.04); border-bottom: 1px solid rgba(201,168,76,0.3); backdrop-filter: blur(8px); flex-wrap: wrap; gap: 6px; }
-.app-logo { font-family: 'Noto Serif KR', serif; font-size: 1.25rem; font-weight: 700; color: var(--gold); letter-spacing: 0.05em; }
-.app-logo span { color: rgba(255,255,255,0.7); font-weight: 300; font-size: 0.85rem; margin-left: 10px; }
-.header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.btn-add { background: var(--gold); color: var(--ink); border: none; padding: 7px 16px; border-radius: 4px; font-family: 'Noto Sans KR', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
-.btn-add:hover { background: var(--gold-light); }
-.main-area { display: flex; flex: 1; gap: 0; padding: 20px 20px 0 20px; min-height: 0; }
-.calendar-panel { flex: 1; display: flex; flex-direction: column; background: var(--paper); border-radius: 8px 0 0 0; overflow: hidden; box-shadow: 0 8px 32px var(--shadow); }
-.cal-header { background: var(--ink); padding: 14px 20px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--gold); }
-.cal-title { font-family: 'Noto Serif KR', serif; font-size: 1.45rem; font-weight: 700; color: var(--gold); cursor: pointer; user-select: none; display: flex; align-items: center; gap: 8px; transition: color 0.2s; }
-.cal-title:hover { color: var(--gold-light); }
-.cal-nav { display: flex; gap: 6px; }
-.cal-nav-btn { background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.4); color: var(--gold); width: 32px; height: 32px; border-radius: 4px; font-size: 1rem; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; justify-content: center; }
-.cal-nav-btn:hover { background: rgba(201,168,76,0.3); }
-.cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); background: var(--ink-light); }
-.cal-weekday { text-align: center; padding: 7px 0; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; color: rgba(255,255,255,0.6); }
-.cal-weekday:first-child { color: #e57373; }
-.cal-weekday:last-child { color: #7ba7d4; }
-.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); flex: 1; border-left: 1px solid var(--border); border-top: 1px solid var(--border); background: var(--paper); }
-.cal-cell { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); min-height: 100px; padding: 5px; position: relative; background: var(--paper); transition: background 0.15s; cursor: pointer; }
-.cal-cell:hover { background: #f5f0e4; }
-.cal-cell.other-month { background: #f7f4ed; opacity: 0.65; }
-.cal-cell.today { outline: 2.5px solid var(--today-border); outline-offset: -2.5px; background: #fff5f5; z-index: 1; }
-.cal-cell.selected { background: #eef3fb; outline: 2px solid #4a7bc4; outline-offset: -2px; }
-.day-num { font-size: 0.78rem; font-weight: 700; color: var(--ink); margin-bottom: 3px; display: inline-block; min-width: 20px; text-align: center; }
-.cal-cell.today .day-num { background: var(--today-border); color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; }
-.cal-cell.other-month .day-num { color: var(--muted); }
-.cal-cell[data-dow="0"] .day-num { color: #c0392b; }
-.cal-cell[data-dow="6"] .day-num { color: #2980b9; }
-.cell-events { display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
-.cell-event { font-size: 0.67rem; padding: 1px 4px; border-radius: 3px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 2px solid var(--gold); background: rgba(201,168,76,0.12); color: var(--ink); transition: background 0.15s; line-height: 1.5; }
-.cell-event:hover { background: rgba(201,168,76,0.28); }
-.cell-event.type-변론 { border-left-color: #c0392b; background: rgba(192,57,43,0.08); }
-.cell-event.type-조정 { border-left-color: #2980b9; background: rgba(41,128,185,0.08); }
-.cell-event.type-선고 { border-left-color: #8e44ad; background: rgba(142,68,173,0.08); }
-.cell-event.type-기타 { border-left-color: #27ae60; background: rgba(39,174,96,0.08); }
-.cell-event.past { border-left-color: #aaa !important; background: rgba(150,150,150,0.08) !important; color: #999 !important; text-decoration: line-through; }
-.cal-cell.past-day { background: #f4f4f0 !important; }
-.cal-cell.past-day .day-num { color: #bbb !important; }
-.cell-more { font-size: 0.62rem; color: var(--muted); padding: 0 3px; cursor: pointer; }
-.detail-panel { width: 300px; background: var(--paper-dark); border-left: 1px solid var(--border); border-radius: 0 8px 0 0; display: flex; flex-direction: column; overflow: hidden; }
-.detail-header { background: var(--ink-light); padding: 10px 16px; border-bottom: 2px solid var(--gold); display: flex; align-items: center; justify-content: space-between; }
-.detail-title { font-family: 'Noto Serif KR', serif; color: var(--gold); font-size: 0.92rem; font-weight: 700; }
-.detail-date-label { font-size: 0.72rem; color: rgba(255,255,255,0.5); }
-.detail-tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--paper); }
-.detail-tab { flex: 1; padding: 8px 0; text-align: center; font-size: 0.76rem; font-weight: 700; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.2s; }
-.detail-tab.active { color: var(--ink); border-bottom-color: var(--gold); }
-.detail-tab:hover { background: var(--paper-dark); }
-.detail-body { flex: 1; overflow-y: auto; padding: 14px; }
-.detail-body::-webkit-scrollbar { width: 4px; }
-.detail-body::-webkit-scrollbar-thumb { background: var(--border-dark); border-radius: 2px; }
-.form-group { margin-bottom: 10px; }
-.form-label { display: block; font-size: 0.71rem; font-weight: 700; color: var(--muted); margin-bottom: 4px; letter-spacing: 0.05em; }
-.form-control { width: 100%; padding: 6px 9px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); font-family: 'Noto Sans KR', sans-serif; font-size: 0.78rem; color: var(--ink); transition: border 0.2s; }
-.form-control:focus { outline: none; border-color: var(--gold); }
-select.form-control { cursor: pointer; }
-textarea.form-control { resize: vertical; min-height: 54px; }
-.detail-actions { padding: 10px 14px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
-.btn-save { flex: 1; background: var(--gold); color: var(--ink); border: none; padding: 8px; border-radius: 4px; font-family: 'Noto Sans KR', sans-serif; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
-.btn-save:hover { background: var(--gold-light); }
-.btn-delete { background: rgba(192,57,43,0.1); color: var(--red); border: 1px solid rgba(192,57,43,0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Noto Sans KR', sans-serif; font-size: 0.8rem; cursor: pointer; }
-.btn-new { background: rgba(74,123,196,0.1); color: #4a7bc4; border: 1px solid rgba(74,123,196,0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Noto Sans KR', sans-serif; font-size: 0.8rem; cursor: pointer; }
-.detail-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--muted); font-size: 0.82rem; text-align: center; gap: 8px; padding: 30px; }
-.detail-empty-icon { font-size: 2rem; opacity: 0.4; }
-.inline-paste-area { display: flex; flex-direction: column; gap: 10px; }
-.inline-paste-area textarea { min-height: 120px; font-size: 0.75rem; }
-.schedule-table-wrap { background: var(--paper); margin: 0 20px; border-radius: 0 0 8px 8px; overflow: hidden; box-shadow: 0 8px 24px var(--shadow); margin-bottom: 20px; }
-.schedule-table-header { background: var(--ink); padding: 10px 18px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(201,168,76,0.2); }
-.schedule-table-title { font-family: 'Noto Serif KR', serif; color: var(--gold); font-size: 0.9rem; font-weight: 700; }
-.schedule-table-wrap table { width: 100%; border-collapse: collapse; font-size: 0.73rem; }
-.schedule-table-wrap th { background: var(--ink-light); color: rgba(255,255,255,0.75); padding: 7px 8px; text-align: center; font-weight: 600; white-space: nowrap; border-right: 1px solid rgba(255,255,255,0.07); }
-.schedule-table-wrap td { padding: 6px 8px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); text-align: center; vertical-align: middle; color: var(--ink); }
-.schedule-table-wrap tr:hover td { background: #f5f0e4; cursor: pointer; }
-.badge { display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 0.68rem; font-weight: 700; }
-.badge-변론 { background: rgba(192,57,43,0.12); color: #c0392b; }
-.badge-조정 { background: rgba(41,128,185,0.12); color: #2980b9; }
-.badge-선고 { background: rgba(142,68,173,0.12); color: #8e44ad; }
-.badge-기타 { background: rgba(39,174,96,0.12); color: #27ae60; }
-.badge-위임Y { background: rgba(39,174,96,0.12); color: #27ae60; }
-.badge-위임N { background: rgba(192,57,43,0.1); color: #c0392b; }
-.empty-row td { color: var(--muted); font-style: italic; }
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(10,10,30,0.7); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-.modal-overlay.show { display: flex; }
-.modal-box { background: var(--paper); border-radius: 10px; padding: 24px; min-width: 320px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); border: 1px solid var(--border); }
-.modal-title { font-family: 'Noto Serif KR', serif; font-size: 1.1rem; font-weight: 700; color: var(--ink); margin-bottom: 18px; text-align: center; }
-.picker-row { display: flex; gap: 14px; margin-bottom: 16px; }
-.picker-col { flex: 1; }
-.picker-col label { font-size: 0.75rem; font-weight: 700; color: var(--muted); display: block; margin-bottom: 5px; }
-.picker-col select { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem; background: white; }
-.modal-actions { display: flex; gap: 10px; }
-.btn-confirm { flex: 1; background: var(--gold); color: var(--ink); border: none; padding: 10px; border-radius: 4px; font-weight: 700; font-size: 0.85rem; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
-.btn-cancel { flex: 1; background: var(--paper-dark); color: var(--muted); border: 1px solid var(--border); padding: 10px; border-radius: 4px; font-weight: 700; font-size: 0.85rem; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
-.dday-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(10,10,30,0.85); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(6px); }
-.dday-modal-overlay.show { display: flex; }
-.dday-box { background: var(--paper); border-radius: 12px; padding: 28px 30px 22px; min-width: 420px; max-width: 560px; max-height: 80vh; overflow-y: auto; box-shadow: 0 24px 72px rgba(0,0,0,0.6); border: 2px solid var(--gold); }
-.dday-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-.dday-icon { font-size: 2rem; }
-.dday-head-text h2 { font-family: 'Noto Serif KR', serif; font-size: 1.25rem; font-weight: 700; color: var(--ink); }
-.dday-head-text p { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
-.dday-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-.dday-item { display: flex; align-items: center; gap: 12px; background: var(--paper-dark); border-radius: 8px; padding: 12px 14px; border-left: 4px solid var(--gold); }
-.dday-item.urgent { border-left-color: var(--red); }
-.dday-item.warning { border-left-color: #e67e22; }
-.dday-badge { font-size: 0.75rem; font-weight: 700; min-width: 52px; text-align: center; padding: 3px 8px; border-radius: 12px; background: var(--ink); color: var(--gold); }
-.dday-item.urgent .dday-badge { background: var(--red); color: white; }
-.dday-item.warning .dday-badge { background: #e67e22; color: white; }
-.dday-item-info { flex: 1; }
-.dday-item-title { font-size: 0.85rem; font-weight: 700; color: var(--ink); }
-.dday-item-desc { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
-.dday-close { width: 100%; background: var(--gold); color: var(--ink); border: none; padding: 11px; border-radius: 6px; font-weight: 700; font-size: 0.88rem; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
-.dday-none { text-align: center; color: var(--muted); padding: 20px 0; font-size: 0.85rem; }
-.section-divider { border: none; border-top: 1px solid var(--border); margin: 6px 0 10px; }
-.mobile-detail-overlay { display: none; position: fixed; inset: 0; background: rgba(10,10,30,0.6); z-index: 500; }
-.mobile-detail-sheet { position: fixed; bottom: 0; left: 0; right: 0; background: var(--paper-dark); border-radius: 16px 16px 0 0; max-height: 88vh; overflow-y: auto; z-index: 501; transform: translateY(100%); transition: transform 0.3s ease; }
-.mobile-detail-sheet.open { transform: translateY(0); }
-.mobile-sheet-handle { width: 40px; height: 4px; background: var(--border-dark); border-radius: 2px; margin: 12px auto 0; }
-.mobile-fab { display: none; position: fixed; bottom: 72px; right: 20px; width: 52px; height: 52px; background: var(--gold); border-radius: 50%; border: none; font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.3); z-index: 400; align-items: center; justify-content: center; color: var(--ink); font-weight: 700; }
-.mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--ink); border-top: 1px solid rgba(201,168,76,0.3); padding: 8px 0; z-index: 300; justify-content: space-around; }
-.mobile-nav-btn { background: none; border: none; color: rgba(255,255,255,0.5); font-size: 0.65rem; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px 8px; font-family: 'Noto Sans KR', sans-serif; }
-.mobile-nav-btn .nav-icon { font-size: 1.2rem; }
-.mobile-nav-btn.active { color: var(--gold); }
-@media (max-width: 768px) {
-  .app-header { padding: 10px 14px; }
-  .app-logo { font-size: 1rem; }
-  .app-logo span { display: none; }
-  .header-actions { display: none; }
-  .main-area { padding: 8px 8px 0; flex-direction: column; }
-  .calendar-panel { border-radius: 8px; }
-  .detail-panel { display: none; }
-  .cal-cell { min-height: 64px; padding: 3px; }
-  .cell-event { font-size: 0.6rem; }
-  .schedule-table-wrap { margin: 6px 8px 70px; border-radius: 8px; }
-  .schedule-table-wrap table { font-size: 0.65rem; }
-  .schedule-table-wrap th, .schedule-table-wrap td { padding: 5px; }
-  .mobile-detail-overlay { display: block; }
-  .mobile-fab { display: flex; }
-  .mobile-bottom-nav { display: flex; }
-  .modal-box { min-width: 90vw !important; max-width: 95vw !important; }
-  .dday-box { min-width: 90vw !important; max-width: 95vw !important; }
+@media(max-width:380px){
+  .cal-grid{grid-auto-rows:minmax(44px,1fr);}
+  .cell-event{font-size:0.5rem;}
 }
 </style>
 </head>
@@ -166,22 +259,29 @@ textarea.form-control { resize: vertical; min-height: 54px; }
 <div class="app-wrapper">
   <div class="app-header">
     <div class="app-logo">⚖ 재판 일정 관리 <span>Court Calendar</span></div>
-    <div id="syncStatus" style="font-size:0.75rem;color:rgba(255,255,255,0.4);">● 연결 중...</div>
-    <div id="lastModified" style="font-size:0.72rem;color:rgba(255,255,255,0.35);"></div>
+    <div class="search-wrap" id="searchWrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="searchInput" type="text" placeholder="사건번호 또는 당사자명 검색..."
+        oninput="onSearchInput(this.value)" onblur="setTimeout(()=>closeSearchDrop(),200)" onkeydown="onSearchKey(event)">
+      <div class="search-dropdown" id="searchDropdown"></div>
+    </div>
+    <div id="syncStatus" style="font-size:0.72rem;color:rgba(255,255,255,0.4);">● 연결 중...</div>
+    <div id="lastModified" style="font-size:0.68rem;color:rgba(255,255,255,0.3);"></div>
     <div class="header-actions">
-      <button class="btn-add" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);" onclick="backupData()">💾 백업</button>
-      <button class="btn-add" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);" onclick="document.getElementById('restoreInput').click()">📂 복원</button>
+      <button class="btn-add" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);" class="btn-desktop-only" onclick="backupData()">💾 백업</button>
+      <button class="btn-add" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);" class="btn-desktop-only" onclick="document.getElementById('restoreInput').click()">📂 복원</button>
       <input type="file" id="restoreInput" accept=".json" style="display:none" onchange="restoreData(event)">
-      <button class="btn-add" onclick="openDDayModal()">⚠️ D-Day 알림</button>
+      <button class="btn-add" onclick="openDDayModal()">⚠️ D-Day</button>
       <button class="btn-add" onclick="openNewEvent()">+ 새 일정</button>
     </div>
   </div>
+
   <div class="main-area">
     <div class="calendar-panel">
       <div class="cal-header">
         <div class="cal-title" onclick="openDatePicker()">
           <span id="calTitleText">2026년 4월</span>
-          <span style="font-size:1rem;opacity:0.7;">▾</span>
+          <span style="font-size:0.9rem;opacity:0.6;">▾</span>
         </div>
         <div class="cal-nav">
           <button class="cal-nav-btn" onclick="changeMonth(-1)">&#8592;</button>
@@ -197,6 +297,7 @@ textarea.form-control { resize: vertical; min-height: 54px; }
       </div>
       <div class="cal-grid" id="calGrid"></div>
     </div>
+
     <div class="detail-panel">
       <div class="detail-header">
         <div class="detail-title">일정 상세</div>
@@ -216,17 +317,18 @@ textarea.form-control { resize: vertical; min-height: 54px; }
       </div>
     </div>
   </div>
+
   <div class="schedule-table-wrap">
     <div class="schedule-table-header">
       <div class="schedule-table-title" id="tableTitle">📋 월별 재판 일정</div>
-      <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);">전체 일정 목록</div>
+      <div style="font-size:0.7rem;color:rgba(255,255,255,0.4);">전체 일정 목록</div>
     </div>
     <div style="overflow-x:auto;">
       <table>
         <thead><tr>
-          <th>기일</th><th>기일시간</th><th>법원명</th><th>사건번호</th>
-          <th>재판부</th><th>종류</th><th>기일장소</th><th>원고</th>
-          <th>피고</th><th>위임여부</th><th>출석자</th><th>진행상황</th>
+          <th>기일</th><th>시간</th><th>법원</th><th>사건번호</th>
+          <th>재판부</th><th>종류</th><th>장소</th><th>원고</th>
+          <th>피고</th><th>위임</th><th>출석자</th><th>진행상황</th>
         </tr></thead>
         <tbody id="scheduleBody"></tbody>
       </table>
@@ -234,14 +336,14 @@ textarea.form-control { resize: vertical; min-height: 54px; }
   </div>
 </div>
 
-<!-- 년/월 모달 -->
+<!-- 년/월 선택 모달 -->
 <div class="modal-overlay" id="datePickerModal">
   <div class="modal-box">
     <div class="modal-title">년/월 선택</div>
-    <div class="picker-row">
-      <div class="picker-col"><label>년도</label><select id="pickYear"></select></div>
-      <div class="picker-col"><label>월</label>
-        <select id="pickMonth">
+    <div style="display:flex;gap:12px;margin-bottom:4px;">
+      <div style="flex:1;"><label class="form-label">년도</label><select id="pickYear" class="form-control"></select></div>
+      <div style="flex:1;"><label class="form-label">월</label>
+        <select id="pickMonth" class="form-control">
           <option value="0">1월</option><option value="1">2월</option><option value="2">3월</option>
           <option value="3">4월</option><option value="4">5월</option><option value="5">6월</option>
           <option value="6">7월</option><option value="7">8월</option><option value="8">9월</option>
@@ -268,20 +370,47 @@ textarea.form-control { resize: vertical; min-height: 54px; }
   </div>
 </div>
 
+<!-- 사건 이력 모달 -->
+<div class="case-modal-overlay" id="caseModal">
+  <div class="case-modal-box">
+    <div class="case-modal-head">
+      <div class="case-modal-head-info">
+        <div class="case-modal-caseNo" id="caseModalNo">사건번호</div>
+        <div class="case-modal-parties" id="caseModalParties"></div>
+      </div>
+      <button class="case-modal-close" onclick="closeCaseModal()">✕</button>
+    </div>
+    <div class="case-modal-body" id="caseModalBody"></div>
+  </div>
+</div>
+
+<!-- 중복 사건 팝업 -->
+<div class="case-dup-modal" id="caseDupModal">
+  <div class="case-dup-box">
+    <div class="case-dup-title" id="caseDupTitle">📌 기존 사건 발견</div>
+    <div class="case-dup-msg" id="caseDupMsg"></div>
+    <div class="case-dup-prev" id="caseDupPrev"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeCaseDupModal()">닫기</button>
+      <button class="btn-confirm" onclick="closeCaseDupModal()">확인</button>
+    </div>
+  </div>
+</div>
+
 <!-- 모바일 하단 시트 -->
 <div class="mobile-detail-overlay" id="mobileOverlay" onclick="closeMobileSheet()"></div>
 <div class="mobile-detail-sheet" id="mobileSheet">
   <div class="mobile-sheet-handle"></div>
-  <div style="padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);">
-    <div style="font-family:'Noto Serif KR',serif;font-size:0.95rem;font-weight:700;color:var(--ink);">일정 상세</div>
-    <button onclick="closeMobileSheet()" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--muted);">✕</button>
+  <div style="padding:9px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);">
+    <div style="font-family:'Noto Serif KR',serif;font-size:0.92rem;font-weight:700;color:var(--ink);" id="mobileSheetTitle">일정 상세</div>
+    <button onclick="closeMobileSheet()" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--muted);">✕</button>
   </div>
   <div class="detail-tabs" id="mobileDetailTabs" style="display:none;">
     <div class="detail-tab active" onclick="switchMobileTab('detail')">📋 일정</div>
     <div class="detail-tab" onclick="switchMobileTab('paste')">📥 붙여넣기</div>
   </div>
-  <div style="padding:14px;" id="mobileDetailBody"></div>
-  <div style="padding:0 14px 10px;display:flex;gap:8px;" id="mobileDetailActions"></div>
+  <div style="padding:12px;" id="mobileDetailBody"></div>
+  <div style="padding:0 12px 10px;display:flex;gap:7px;" id="mobileDetailActions"></div>
 </div>
 <button class="mobile-fab" onclick="openNewEvent()">+</button>
 <div class="mobile-bottom-nav">
@@ -292,65 +421,148 @@ textarea.form-control { resize: vertical; min-height: 54px; }
 </div>
 
 <script>
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbzxOmZHCK_bFRwiMExLf9Cs4RyiLEKyUvhrpVki_MjOjlzGDRvB1UduWfqdb8vf44KGcA/exec';
-const OUR_KEYWORDS = ['굿리치','리치앤코','리치플래너컨설팅'];
+// ════════════════════════════════════════════════════════
+// 설정
+// ════════════════════════════════════════════════════════
+const GAS_URL='https://script.google.com/macros/s/AKfycbxxwW1dCaWjWtrNHxUfDX_QWkdL-NVbVRyIOZvPUlTbwFjern8_cwGqbDnaVi33GvYu1A/exec';
+const OUR_KEYWORDS=['굿리치','리치앤코','리치플래너컨설팅'];
+// 기일장소에서 제거할 긴 문구 패턴
+const LOC_NOISE=[/\(서초역.*?\)/g,/※본 건 조정.*?주시기 바랍니다\./g,/서울법원조정센터.*?주시기 바랍니다\./g,/\s*\(.*?도보.*?\)/g];
 
-function isOurs(name){ return OUR_KEYWORDS.some(k=>(name||'').includes(k)); }
+function isOurs(n){return OUR_KEYWORDS.some(k=>(n||'').includes(k));}
 function getOpponent(ev){
-  if(isOurs(ev.plaintiff)) return ev.defendant||ev.plaintiff||'';
-  if(isOurs(ev.defendant)) return ev.plaintiff||ev.defendant||'';
+  if(isOurs(ev.plaintiff))return ev.defendant||ev.plaintiff||'';
+  if(isOurs(ev.defendant))return ev.plaintiff||ev.defendant||'';
   return ev.plaintiff||ev.defendant||'';
 }
-// 시간 문자열 정규화 (구글 시트 Date 객체 대응)
+function cleanLoc(loc){
+  if(!loc)return'';
+  let s=String(loc);
+  LOC_NOISE.forEach(p=>s=s.replace(p,''));
+  return s.trim();
+}
 function normalizeTime(val){
-  if(!val) return '';
-  const s = String(val);
-  // 이미 HH:mm 형식이면 그대로
-  if(/^\d{1,2}:\d{2}$/.test(s.trim())) return s.trim();
-  // Date 문자열 형태 (Sat Dec 30 1899 ...) 파싱
-  try {
-    const d = new Date(val);
-    if(!isNaN(d)) return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-  } catch(e){}
+  if(!val)return'';const s=String(val);
+  if(/^\d{1,2}:\d{2}$/.test(s.trim()))return s.trim();
+  try{const d=new Date(val);if(!isNaN(d))return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}catch(e){}
   return s;
 }
-// 날짜 문자열 정규화
 function normalizeDate(val){
-  if(!val) return '';
-  const s = String(val);
-  if(/^\d{4}-\d{2}-\d{2}$/.test(s.trim())) return s.trim();
-  try {
-    const d = new Date(val);
-    if(!isNaN(d)) return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-  } catch(e){}
+  if(!val)return'';const s=String(val);
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s.trim()))return s.trim();
+  try{const d=new Date(val);if(!isNaN(d))return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}catch(e){}
   return s;
 }
+function fmtDate(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function addDays(dateStr,n){const d=new Date(dateStr);d.setDate(d.getDate()+n);return fmtDate(d);}
+function escHtml(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-let currentYear, currentMonth;
-let events = {};
-let selectedEventId = null;
-let selectedDate = null;
-let currentTab = 'detail';
-const today = new Date();
+// ════════════════════════════════════════════════════════
+// 상태
+// events: {날짜: [{id,date,time,court,caseNo,div,type,loc,plaintiff,defendant,delegation,attendee,status,memo,flagType,verdictDate,appealDeadline}]}
+// caseDB: {사건번호: {caseNo,plaintiff,defendant,history:[{date,type,loc,status,memo,registeredAt}]}}
+// deadlines: [{id,caseNo,title,date,type:'appeal'|'objection'|'custom'}]
+// ════════════════════════════════════════════════════════
+let currentYear,currentMonth;
+let events={};
+let caseDB={};   // 사건별 누적 이력
+let deadlines=[]; // 마감일 별도 관리
+let selectedEventId=null;
+let selectedDate=null;
+let currentTab='detail';
+const today=new Date();
 
-function showSyncStatus(msg,color){ const el=document.getElementById('syncStatus'); if(el){el.textContent=msg;el.style.color=color||'rgba(255,255,255,0.5)';} }
-function showLastModified(when){ const el=document.getElementById('lastModified'); if(el&&when)el.textContent='최종수정: '+when; }
+function showSyncStatus(msg,color){const el=document.getElementById('syncStatus');if(el){el.textContent=msg;el.style.color=color||'rgba(255,255,255,0.4)';}}
+function showLastModified(when){const el=document.getElementById('lastModified');if(el&&when)el.textContent='최종수정: '+when;}
 
-// ─── Init ─────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════
+// Init
+// ════════════════════════════════════════════════════════
 (async function init(){
-  currentYear=today.getFullYear(); currentMonth=today.getMonth();
-  const raw=localStorage.getItem('courtEvents');
-  if(raw){
-    events=JSON.parse(raw);
-    const mr=localStorage.getItem('courtMeta'); if(mr)showLastModified(JSON.parse(mr).modTime);
-    renderCalendar(); renderScheduleTable();
-  }
+  currentYear=today.getFullYear();currentMonth=today.getMonth();
+  // 로컬 캐시 먼저
+  loadLocal();
+  if(Object.keys(events).length>0){renderCalendar();renderScheduleTable();}
+  // 년도 picker
   const py=document.getElementById('pickYear');
   for(let y=2020;y<=2035;y++){const o=document.createElement('option');o.value=y;o.textContent=y+'년';if(y===currentYear)o.selected=true;py.appendChild(o);}
+  // 구글 시트 로드
   await loadFromStorage();
+  // 알림: PC만
+  setTimeout(()=>initNotifications(),1000);
 })();
 
-// ─── JSONP 통신 ──────────────────────────────────────────
+function loadLocal(){
+  try{
+    const r=localStorage.getItem('courtEvents');if(r)events=JSON.parse(r);
+    const c=localStorage.getItem('courtCaseDB');if(c)caseDB=JSON.parse(c);
+    const d=localStorage.getItem('courtDeadlines');if(d)deadlines=JSON.parse(d);
+    const m=localStorage.getItem('courtMeta');if(m)showLastModified(JSON.parse(m).modTime);
+  }catch(e){events={};caseDB={};deadlines=[];}
+}
+function saveLocal(){
+  const now=new Date();
+  const modTime=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  localStorage.setItem('courtEvents',JSON.stringify(events));
+  localStorage.setItem('courtCaseDB',JSON.stringify(caseDB));
+  localStorage.setItem('courtDeadlines',JSON.stringify(deadlines));
+  localStorage.setItem('courtMeta',JSON.stringify({modTime}));
+  showLastModified(modTime);
+  return modTime;
+}
+
+// ════════════════════════════════════════════════════════
+// 사건 DB 관리
+// ════════════════════════════════════════════════════════
+function updateCaseDB(ev){
+  if(!ev.caseNo)return;
+  const key=ev.caseNo.split(' ')[0]; // 본소/반소 구분 제거
+  if(!caseDB[key]){
+    caseDB[key]={caseNo:ev.caseNo,plaintiff:ev.plaintiff,defendant:ev.defendant,history:[]};
+  }
+  // 중복 기일 체크 (같은 날짜+시간이면 업데이트)
+  const existing=caseDB[key].history.find(h=>h.date===ev.date&&h.time===ev.time);
+  if(existing){
+    existing.type=ev.type;existing.loc=cleanLoc(ev.loc);existing.status=ev.status;existing.memo=ev.memo;
+  }else{
+    caseDB[key].history.push({date:ev.date,time:ev.time,type:ev.type,loc:cleanLoc(ev.loc),status:ev.status||'',memo:ev.memo||'',registeredAt:fmtDate(today)});
+  }
+  caseDB[key].history.sort((a,b)=>a.date.localeCompare(b.date));
+}
+function getCaseHistory(caseNo){
+  if(!caseNo)return null;
+  const key=caseNo.split(' ')[0];
+  return caseDB[key]||null;
+}
+function getCaseCount(caseNo,currentDate){
+  const hist=getCaseHistory(caseNo);
+  if(!hist)return 0;
+  return hist.history.filter(h=>h.date<currentDate).length;
+}
+
+// ════════════════════════════════════════════════════════
+// 상소 마감일 자동 계산
+// ════════════════════════════════════════════════════════
+function checkAndAddAppealDeadline(ev){
+  if(ev.type!=='선고'||!ev.verdictDate)return;
+  const deadlineDate=addDays(ev.verdictDate,14);
+  // 중복 방지
+  const dup=deadlines.find(d=>d.caseNo===ev.caseNo&&d.type==='appeal');
+  if(!dup){
+    deadlines.push({id:Date.now()+Math.random(),caseNo:ev.caseNo,title:'상소마감 ('+getOpponent(ev)+')',date:deadlineDate,type:'appeal',relatedEvId:ev.id});
+    // 마감일을 달력에도 표시
+    if(!events[deadlineDate])events[deadlineDate]=[];
+    const dup2=events[deadlineDate].find(e=>e.caseNo===ev.caseNo&&e.type==='마감');
+    if(!dup2){
+      const opName=getOpponent(ev);
+      events[deadlineDate].push({id:'dl-'+Date.now(),date:deadlineDate,time:'',court:'',caseNo:ev.caseNo,div:'',type:'마감',loc:'',plaintiff:ev.plaintiff,defendant:ev.defendant,delegation:'',attendee:'',status:'',memo:'상소마감 · '+opName,flagType:'deadline'});
+    }
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// Google Sheets 연동
+// ════════════════════════════════════════════════════════
 function gasJsonp(params){
   return new Promise((resolve,reject)=>{
     const cb='_gasCb_'+Date.now();
@@ -364,384 +576,466 @@ function gasJsonp(params){
     document.head.appendChild(script);
   });
 }
-
 async function saveToStorage(){
-  const now=new Date();
-  const modTime=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-  localStorage.setItem('courtEvents',JSON.stringify(events));
-  localStorage.setItem('courtMeta',JSON.stringify({modTime}));
-  showLastModified(modTime);
+  const modTime=saveLocal();
   showSyncStatus('⏳ 저장 중...','#e8c97a');
+  const payload={events,caseDB,deadlines,_meta:{modTime}};
   try{
-    await gasJsonp({action:'save',data:encodeURIComponent(JSON.stringify({events,_meta:{modTime}}))});
+    await gasJsonp({action:'save',data:encodeURIComponent(JSON.stringify(payload))});
     showSyncStatus('✅ 저장됨','#7bc47b');
     setTimeout(()=>showSyncStatus('● 구글 시트 연동','rgba(255,255,255,0.4)'),2000);
   }catch(e){
-    try{
-      await fetch(GAS_URL+'?action=save',{method:'POST',body:JSON.stringify({events,_meta:{modTime}})});
-      showSyncStatus('✅ 저장됨','#7bc47b');
-      setTimeout(()=>showSyncStatus('● 구글 시트 연동','rgba(255,255,255,0.4)'),2000);
-    }catch(e2){ showSyncStatus('✅ 로컬 저장됨','#7bc47b'); }
+    try{await fetch(GAS_URL+'?action=save',{method:'POST',body:JSON.stringify(payload)});showSyncStatus('✅ 저장됨','#7bc47b');setTimeout(()=>showSyncStatus('● 구글 시트 연동','rgba(255,255,255,0.4)'),2000);}
+    catch(e2){showSyncStatus('✅ 로컬 저장됨','#7bc47b');}
   }
 }
-
 async function loadFromStorage(){
   showSyncStatus('⏳ 불러오는 중...','#e8c97a');
-  let loaded=false;
-  try{
-    const data=await gasJsonp({action:'load'});
-    if(data&&typeof data==='object'){
-      const meta=data._meta; delete data._meta;
-      // 날짜/시간 정규화
-      const normalized={};
-      Object.entries(data).forEach(([dk,evs])=>{
-        const fixedDate=normalizeDate(dk);
-        if(!fixedDate)return;
-        normalized[fixedDate]=(evs||[]).map(ev=>({...ev,date:normalizeDate(ev.date),time:normalizeTime(ev.time)}));
+  let data=null;
+  try{data=await gasJsonp({action:'load'});}
+  catch(e){try{const r=await fetch(GAS_URL+'?action=load');data=await r.json();}catch(e2){}}
+  if(data&&typeof data==='object'){
+    const meta=data._meta;delete data._meta;
+    // events 정규화
+    if(data.events){
+      const norm={};
+      Object.entries(data.events).forEach(([dk,evs])=>{
+        const fd=normalizeDate(dk);if(!fd)return;
+        norm[fd]=(evs||[]).map(ev=>({...ev,date:normalizeDate(ev.date),time:normalizeTime(ev.time),loc:cleanLoc(ev.loc)}));
       });
-      events=normalized;
-      localStorage.setItem('courtEvents',JSON.stringify(events));
-      if(meta){localStorage.setItem('courtMeta',JSON.stringify(meta));showLastModified(meta.modTime);}
-      showSyncStatus('✅ 동기화됨','#7bc47b');
-      setTimeout(()=>showSyncStatus('● 구글 시트 연동','rgba(255,255,255,0.4)'),2000);
-      loaded=true;
+      events=norm;
     }
-  }catch(e){
-    try{
-      const res=await fetch(GAS_URL+'?action=load');
-      const data=await res.json();
-      if(data&&typeof data==='object'){
-        const meta=data._meta; delete data._meta;
-        const normalized={};
-        Object.entries(data).forEach(([dk,evs])=>{
-          const fixedDate=normalizeDate(dk);
-          if(!fixedDate)return;
-          normalized[fixedDate]=(evs||[]).map(ev=>({...ev,date:normalizeDate(ev.date),time:normalizeTime(ev.time)}));
-        });
-        events=normalized;
-        localStorage.setItem('courtEvents',JSON.stringify(events));
-        if(meta){localStorage.setItem('courtMeta',JSON.stringify(meta));showLastModified(meta.modTime);}
-        showSyncStatus('✅ 동기화됨','#7bc47b');
-        setTimeout(()=>showSyncStatus('● 구글 시트 연동','rgba(255,255,255,0.4)'),2000);
-        loaded=true;
-      }
-    }catch(e2){
-      const raw=localStorage.getItem('courtEvents');
-      if(raw)events=JSON.parse(raw); else events={};
-      showSyncStatus('⚠ 오프라인 (로컬)','#e67e22');
-    }
+    if(data.caseDB)caseDB=data.caseDB;
+    if(data.deadlines)deadlines=data.deadlines;
+    if(meta){localStorage.setItem('courtMeta',JSON.stringify(meta));showLastModified(meta.modTime);}
+    localStorage.setItem('courtEvents',JSON.stringify(events));
+    localStorage.setItem('courtCaseDB',JSON.stringify(caseDB));
+    localStorage.setItem('courtDeadlines',JSON.stringify(deadlines));
+    showSyncStatus('✅ 동기화됨','#7bc47b');
+    setTimeout(()=>showSyncStatus('● 구글 시트 연동','rgba(255,255,255,0.4)'),2000);
+  }else{
+    showSyncStatus('⚠ 오프라인 (로컬)','#e67e22');
   }
   if(Object.keys(events).length===0){
+    // 샘플
     const td=fmtDate(today);
     const in5=fmtDate(new Date(today.getFullYear(),today.getMonth(),today.getDate()+5));
-    addSampleEvent(td,'09:30','서울중앙지방법원','2024가합12345','민사21부','변론','민사21호법정','김철수','굿리치 주식회사','Y','홍길동 변호사','1차 변론기일','준비서면 제출 필요','deadline');
-    addSampleEvent(in5,'10:30','서울고등법원','2024나54321','민사3부','변론','서관4호','굿리치 주식회사','(주)미래기업','N','본인출석','항소심 계속','상소이유서 마감 D-5','deadline');
+    addEv(td,'09:30','서울중앙지방법원','2024가합12345','민사21부','변론','민사21호법정','김철수','굿리치 주식회사','Y','홍길동 변호사','1차 변론기일','준비서면 제출 필요','deadline','','');
+    addEv(in5,'10:30','서울고등법원','2024나54321','민사3부','변론','서관4호','굿리치 주식회사','(주)미래기업','N','본인출석','항소심 계속','상소이유서 마감 D-5','deadline','','');
     await saveToStorage();
   }
-  renderCalendar(); renderScheduleTable();
+  renderCalendar();renderScheduleTable();
   setTimeout(()=>openDDayModal(),400);
-  setTimeout(()=>initNotifications(),1200);
 }
-function addSampleEvent(date,time,court,caseNo,div,type,loc,plaintiff,defendant,delegation,attendee,status,memo,flagType){
+function addEv(date,time,court,caseNo,div,type,loc,plaintiff,defendant,delegation,attendee,status,memo,flagType,verdictDate,appealDeadline){
   if(!events[date])events[date]=[];
-  events[date].push({id:Date.now()+Math.random(),date,time,court,caseNo,div,type,loc,plaintiff,defendant,delegation,attendee,status,memo,flagType:flagType||''});
+  const ev={id:Date.now()+Math.random(),date,time,court,caseNo,div,type,loc:cleanLoc(loc),plaintiff,defendant,delegation,attendee,status,memo,flagType:flagType||'',verdictDate:verdictDate||'',appealDeadline:appealDeadline||''};
+  events[date].push(ev);
+  updateCaseDB(ev);
 }
 
-// ─── 알림 (PC만) ─────────────────────────────────────────
+// ════════════════════════════════════════════════════════
+// 알림 (PC 전용)
+// ════════════════════════════════════════════════════════
+function isMobileDevice(){return /Mobi|Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||('ontouchstart'in window&&window.innerWidth<=768);}
 function initNotifications(){
-  if(/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent))return;
+  if(isMobileDevice())return; // 모바일 완전 차단
   if(!('Notification'in window))return;
   if(Notification.permission==='granted')scheduleNotifications();
   else if(Notification.permission!=='denied')
-    Notification.requestPermission().then(p=>{if(p==='granted'){scheduleNotifications();sendNotification('⚖ 재판 일정 관리','브라우저 알림이 활성화되었습니다.',null);}});
+    Notification.requestPermission().then(p=>{if(p==='granted'){scheduleNotifications();sendNotif('⚖ 재판 일정 관리','브라우저 알림이 활성화되었습니다.',null);}});
 }
-function sendNotification(title,body,tag){
+function sendNotif(title,body,tag){
+  if(isMobileDevice())return; // 이중 차단
   if(Notification.permission!=='granted')return;
-  const n=new Notification(title,{body,tag:tag||('court-'+Date.now()),requireInteraction:true});
+  const n=new Notification(title,{body,tag:tag||('c-'+Date.now()),requireInteraction:true});
   n.onclick=()=>{window.focus();n.close();};
 }
 function scheduleNotifications(){
-  if(window._notifTimers)window._notifTimers.forEach(clearTimeout);
-  window._notifTimers=[];
+  if(window._nt)window._nt.forEach(clearTimeout);window._nt=[];
   const now=new Date();
-  for(let offset=0;offset<=2;offset++){
-    const ds=fmtDate(new Date(today.getFullYear(),today.getMonth(),today.getDate()+offset));
+  for(let off=0;off<=3;off++){
+    const ds=fmtDate(new Date(today.getFullYear(),today.getMonth(),today.getDate()+off));
     (events[ds]||[]).forEach(ev=>{
-      if(!ev.time)return;
+      if(!ev.time||ev.type==='마감')return;
       const[h,m]=ev.time.split(':').map(Number);
-      const evDate=new Date(ds); evDate.setHours(h,m,0,0);
+      const evD=new Date(ds);evD.setHours(h,m,0,0);
       [[2,'(2일 전)'],[1,'(1일 전)']].forEach(([days,label])=>{
-        const t=new Date(evDate.getFullYear(),evDate.getMonth(),evDate.getDate()-days,9,0,0);
+        const t=new Date(evD.getFullYear(),evD.getMonth(),evD.getDate()-days,9,0,0);
         const ms=t-now;
-        if(ms>0&&ms<72*60*60*1000)window._notifTimers.push(setTimeout(()=>sendNotification('⚖ 재판 기일 알림 '+label,ev.time+' · '+getOpponent(ev)+' '+(ev.type||'')+'\n'+(ev.court||'')+' '+(ev.caseNo||''),'ev-'+ev.id+label),ms));
+        if(ms>0&&ms<72*60*60*1000)window._nt.push(setTimeout(()=>sendNotif('⚖ 재판 기일 알림 '+label,ev.time+' · '+getOpponent(ev)+' '+(ev.type||'')+'\n'+(ev.court||'')+' '+(ev.caseNo||''),'ev-'+ev.id+label),ms));
       });
+    });
+    // 마감일 알림
+    deadlines.filter(d=>d.date===ds).forEach(dl=>{
+      const t=new Date(ds);t.setHours(9,0,0,0);
+      const ms=t-now;
+      if(ms>0&&ms<24*60*60*1000)window._nt.push(setTimeout(()=>sendNotif('⚖ 마감일 알림 [D-Day]',dl.title+'\n'+dl.date,'dl-'+dl.id),ms));
     });
   }
   const m9=new Date(now.getFullYear(),now.getMonth(),now.getDate(),9,0,0);
-  if(now<m9)window._notifTimers.push(setTimeout(sendDailyDDayNotif,m9-now));
+  if(now<m9)window._nt.push(setTimeout(sendDailyNotif,m9-now));
 }
-function sendDailyDDayNotif(){
+function sendDailyNotif(){
   const urgent=[];
-  Object.entries(events).forEach(([dk,evs])=>{const diff=Math.ceil((new Date(dk)-today)/86400000);if(diff>=0&&diff<=3)evs.forEach(ev=>urgent.push({...ev,diff}));});
-  if(urgent.length>0){urgent.sort((a,b)=>a.diff-b.diff);const top=urgent[0];sendNotification('⚖ 긴급 알림 ['+(top.diff===0?'D-Day':'D-'+top.diff)+']',getOpponent(top)+' '+(top.type||'')+' '+(top.time||'')+'\n'+(top.court||'')+(top.memo?'\n📌 '+top.memo:''),'court-daily');}
+  Object.entries(events).forEach(([dk,evs])=>{const diff=Math.ceil((new Date(dk)-today)/86400000);if(diff>=0&&diff<=3)evs.forEach(ev=>{if(ev.type!=='마감')urgent.push({...ev,diff});});});
+  deadlines.forEach(dl=>{const diff=Math.ceil((new Date(dl.date)-today)/86400000);if(diff>=0&&diff<=3)urgent.push({title:dl.title,diff,type:'마감',time:'',court:'',memo:'',caseNo:dl.caseNo});});
+  if(urgent.length>0){urgent.sort((a,b)=>a.diff-b.diff);const top=urgent[0];sendNotif('⚖ 긴급 알림 ['+(top.diff===0?'D-Day':'D-'+top.diff)+']',(top.title||getOpponent(top))+' '+(top.type||'')+'\n'+(top.court||'')+(top.memo?'\n📌 '+top.memo:''),'daily');}
 }
 
-// ─── 달력 ────────────────────────────────────────────────
-function fmtDate(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+// ════════════════════════════════════════════════════════
+// 달력 렌더
+// ════════════════════════════════════════════════════════
 function renderCalendar(){
   document.getElementById('calTitleText').textContent=currentYear+'년 '+(currentMonth+1)+'월';
   document.getElementById('tableTitle').textContent='📋 '+currentYear+'년 '+(currentMonth+1)+'월 재판 일정';
-  const grid=document.getElementById('calGrid'); grid.innerHTML='';
+  const grid=document.getElementById('calGrid');grid.innerHTML='';
   const firstDay=new Date(currentYear,currentMonth,1).getDay();
-  const daysInMonth=new Date(currentYear,currentMonth+1,0).getDate();
-  const daysInPrev=new Date(currentYear,currentMonth,0).getDate();
+  const dim=new Date(currentYear,currentMonth+1,0).getDate();
+  const dip=new Date(currentYear,currentMonth,0).getDate();
   let cells=[];
-  for(let i=firstDay-1;i>=0;i--)cells.push({d:daysInPrev-i,month:currentMonth-1,year:currentYear,other:true});
-  for(let d=1;d<=daysInMonth;d++)cells.push({d,month:currentMonth,year:currentYear,other:false});
-  let next=1; while(cells.length%7!==0)cells.push({d:next++,month:currentMonth+1,year:currentYear,other:true});
+  for(let i=firstDay-1;i>=0;i--)cells.push({d:dip-i,m:currentMonth-1,y:currentYear,other:true});
+  for(let d=1;d<=dim;d++)cells.push({d,m:currentMonth,y:currentYear,other:false});
+  let nx=1;while(cells.length%7!==0)cells.push({d:nx++,m:currentMonth+1,y:currentYear,other:true});
   cells.forEach(c=>{
-    const dateStr=fmtDate(new Date(c.year,c.month,c.d));
+    const ds=fmtDate(new Date(c.y,c.m,c.d));
     const cell=document.createElement('div');
     cell.className='cal-cell'+(c.other?' other-month':'');
-    cell.dataset.dow=new Date(c.year,c.month,c.d).getDay();
-    cell.dataset.date=dateStr;
-    if(!c.other&&fmtDate(today)===dateStr)cell.classList.add('today');
-    if(!c.other&&new Date(c.year,c.month,c.d)<new Date(today.getFullYear(),today.getMonth(),today.getDate()))cell.classList.add('past-day');
-    cell.innerHTML='<div class="day-num">'+c.d+'</div><div class="cell-events" id="cell-'+dateStr+'"></div>';
-    cell.addEventListener('click',e=>{if(!e.target.classList.contains('cell-event')&&!e.target.classList.contains('cell-more'))selectDate(dateStr);});
+    cell.dataset.dow=new Date(c.y,c.m,c.d).getDay();
+    cell.dataset.date=ds;
+    if(!c.other&&fmtDate(today)===ds)cell.classList.add('today');
+    if(!c.other&&new Date(c.y,c.m,c.d)<new Date(today.getFullYear(),today.getMonth(),today.getDate()))cell.classList.add('past-day');
+    cell.innerHTML='<div class="day-num">'+c.d+'</div><div class="cell-events" id="cell-'+ds+'"></div>';
+    cell.addEventListener('click',e=>{if(!e.target.classList.contains('cell-event')&&!e.target.classList.contains('cell-more'))selectDate(ds);});
     grid.appendChild(cell);
-    renderCellEvents(dateStr);
+    renderCellEvents(ds);
   });
 }
-function renderCellEvents(dateStr){
-  const container=document.getElementById('cell-'+dateStr); if(!container)return;
+function renderCellEvents(ds){
+  const container=document.getElementById('cell-'+ds);if(!container)return;
   container.innerHTML='';
-  const dayEvents=(events[dateStr]||[]).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
-  const max=5;
-  const isPast=new Date(dateStr)<new Date(today.getFullYear(),today.getMonth(),today.getDate());
-  dayEvents.slice(0,max).forEach(ev=>{
+  const dayEvs=(events[ds]||[]).sort((a,b)=>(a.time||'zzz').localeCompare(b.time||'zzz'));
+  const max=4;
+  const isPast=new Date(ds)<new Date(today.getFullYear(),today.getMonth(),today.getDate());
+  dayEvs.slice(0,max).forEach(ev=>{
     const div=document.createElement('div');
     div.className='cell-event type-'+(ev.type||'기타')+(isPast?' past':'');
-    const opName=getOpponent(ev);
+    const opName=ev.type==='마감'?ev.memo||'마감':getOpponent(ev);
     div.title=[ev.time,opName,ev.type].filter(Boolean).join(' ');
-    div.textContent=(ev.time?ev.time+' ':'')+opName;
-    div.addEventListener('click',e=>{e.stopPropagation();openEventDetail(ev.id,dateStr);});
+    div.textContent=(ev.time?ev.time.substring(0,5)+' ':'')+opName;
+    div.addEventListener('click',e=>{e.stopPropagation();openEventDetail(ev.id,ds);});
     container.appendChild(div);
   });
-  if(dayEvents.length>max){
+  if(dayEvs.length>max){
     const more=document.createElement('div');
-    more.className='cell-more'; more.textContent='+'+(dayEvents.length-max)+'개 더';
-    more.addEventListener('click',e=>{e.stopPropagation();selectDate(dateStr);});
+    more.className='cell-more';more.textContent='+'+(dayEvs.length-max)+'개';
+    more.addEventListener('click',e=>{e.stopPropagation();selectDate(ds);});
     container.appendChild(more);
   }
 }
 
-// ─── 네비게이션 ──────────────────────────────────────────
+// ════════════════════════════════════════════════════════
+// 네비게이션
+// ════════════════════════════════════════════════════════
 function changeMonth(d){currentMonth+=d;if(currentMonth>11){currentMonth=0;currentYear++;}if(currentMonth<0){currentMonth=11;currentYear--;}renderCalendar();renderScheduleTable();}
 function goToday(){currentYear=today.getFullYear();currentMonth=today.getMonth();renderCalendar();renderScheduleTable();}
 function openDatePicker(){document.getElementById('pickYear').value=currentYear;document.getElementById('pickMonth').value=currentMonth;document.getElementById('datePickerModal').classList.add('show');}
 function closeDatePicker(){document.getElementById('datePickerModal').classList.remove('show');}
 function confirmDatePick(){currentYear=parseInt(document.getElementById('pickYear').value);currentMonth=parseInt(document.getElementById('pickMonth').value);renderCalendar();renderScheduleTable();closeDatePicker();}
 
-// ─── 탭 전환 ─────────────────────────────────────────────
+// ════════════════════════════════════════════════════════
+// 탭 전환
+// ════════════════════════════════════════════════════════
 function switchTab(tab){
   currentTab=tab;
   document.getElementById('tabDetail').classList.toggle('active',tab==='detail');
   document.getElementById('tabPaste').classList.toggle('active',tab==='paste');
-  if(tab==='detail')showDetailContent();
-  else showPasteContent('detailBody','detailActions');
+  if(tab==='detail')showDetailContent();else showPasteContent('detailBody','detailActions');
 }
 function switchMobileTab(tab){
   currentTab=tab;
   document.querySelectorAll('#mobileDetailTabs .detail-tab').forEach((el,i)=>el.classList.toggle('active',(i===0&&tab==='detail')||(i===1&&tab==='paste')));
-  if(tab==='detail')syncMobileDetail();
-  else showPasteContent('mobileDetailBody','mobileDetailActions');
+  if(tab==='detail')syncMobileDetail();else showPasteContent('mobileDetailBody','mobileDetailActions');
 }
 function showDetailContent(){
-  if(selectedEventId){
-    const ev=(events[selectedDate]||[]).find(e=>e.id===selectedEventId);
-    if(ev)showDetailForm(ev,selectedDate); else showDetailForm(null,selectedDate);
-  } else showDetailForm(null,selectedDate||fmtDate(today));
-}
-function showPasteContent(bodyId,actionsId){
-  const dateStr=selectedDate||fmtDate(today);
-  const body=document.getElementById(bodyId);
-  const actions=document.getElementById(actionsId);
-  if(actions)actions.innerHTML='';
-  const uid=bodyId==='detailBody'?'inline':'mobile';
-  body.innerHTML=`
-    <div class="inline-paste-area">
-      <div class="form-group">
-        <label class="form-label">기일 날짜</label>
-        <input type="date" class="form-control" id="${uid}PasteDate" value="${dateStr}" style="max-width:180px;">
-      </div>
-      <div class="form-group">
-        <label class="form-label">법원 시스템에서 복사 후 붙여넣기</label>
-        <textarea class="form-control" id="${uid}PasteText" rows="7" placeholder="법원   사건번호   재판부   기일종류   기일시간   기일장소   원고   피고"></textarea>
-      </div>
-      <div id="${uid}PastePreview" style="display:none;margin-bottom:8px;">
-        <div class="form-label" style="margin-bottom:4px;">미리보기</div>
-        <div id="${uid}PastePreviewContent" style="font-size:0.72rem;background:var(--paper-dark);border-radius:6px;padding:8px;max-height:130px;overflow-y:auto;border:1px solid var(--border);"></div>
-      </div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn-new" onclick="pastePreview('${uid}')" style="flex:1;">미리보기</button>
-        <button class="btn-save" id="${uid}ImportBtn" onclick="pasteImport('${uid}')" style="flex:1;display:none;">✅ 가져오기</button>
-      </div>
-    </div>`;
+  if(selectedEventId){const ev=(events[selectedDate]||[]).find(e=>e.id===selectedEventId);if(ev)showDetailForm(ev,selectedDate);else showDetailForm(null,selectedDate);}
+  else showDetailForm(null,selectedDate||fmtDate(today));
 }
 
-const parsedRowsMap={};
-function pastePreview(uid){
-  const text=document.getElementById(uid+'PasteText').value; if(!text.trim()){alert('내용을 붙여넣어 주세요.');return;}
-  parsedRowsMap[uid]=parseCourt(text); if(!parsedRowsMap[uid].length){alert('파싱된 일정이 없습니다.');return;}
-  document.getElementById(uid+'PastePreviewContent').innerHTML=parsedRowsMap[uid].map((r,i)=>`<div style="padding:3px 0;border-bottom:1px solid var(--border);display:flex;gap:6px;align-items:center;flex-wrap:wrap"><b>${i+1}</b><b>${r.time||'-'}</b><span style="color:#2980b9">${r.court}</span><span style="font-size:0.68rem">${r.caseNo}</span><span class="badge badge-${r.type}">${r.type}</span><span>${r.plaintiff} vs ${r.defendant}</span></div>`).join('');
-  document.getElementById(uid+'PastePreview').style.display='block';
-  document.getElementById(uid+'ImportBtn').style.display='block';
-}
-async function pasteImport(uid){
-  const dateStr=document.getElementById(uid+'PasteDate').value; if(!dateStr){alert('날짜를 입력해 주세요.');return;}
-  const rows=parsedRowsMap[uid]||[]; if(!rows.length){alert('먼저 미리보기를 눌러주세요.');return;}
-  let added=0;
-  rows.forEach(r=>{
-    if(!events[dateStr])events[dateStr]=[];
-    const dup=events[dateStr].find(e=>e.caseNo===r.caseNo&&e.time===r.time);
-    if(!dup){events[dateStr].push({id:Date.now()+Math.random(),date:dateStr,...r,delegation:'Y',attendee:'',status:'',memo:'',flagType:''});added++;}
-  });
-  await saveToStorage(); renderCalendar(); renderScheduleTable();
-  alert('✅ '+added+'개 일정을 가져왔습니다!');
-  parsedRowsMap[uid]=[];
-  switchTab('detail');
-  if(uid==='mobile')closeMobileSheet();
-}
-
-// ─── 일정 상세 폼 ────────────────────────────────────────
-function selectDate(dateStr){
-  selectedDate=dateStr;
+// ════════════════════════════════════════════════════════
+// 상세 폼
+// ════════════════════════════════════════════════════════
+function selectDate(ds){
+  selectedDate=ds;
   document.querySelectorAll('.cal-cell').forEach(c=>c.classList.remove('selected'));
-  const cell=document.querySelector('[data-date="'+dateStr+'"]'); if(cell)cell.classList.add('selected');
+  const cell=document.querySelector('[data-date="'+ds+'"]');if(cell)cell.classList.add('selected');
   document.getElementById('detailTabs').style.display='flex';
   document.getElementById('mobileDetailTabs').style.display='flex';
-  const d=new Date(dateStr);
+  const d=new Date(ds);
   document.getElementById('detailDateLabel').textContent=(d.getMonth()+1)+'월 '+d.getDate()+'일';
   currentTab='detail';
-  document.getElementById('tabDetail').classList.add('active');
-  document.getElementById('tabPaste').classList.remove('active');
-  const dayEvents=events[dateStr]||[];
-  if(dayEvents.length>0)openEventDetail(dayEvents[0].id,dateStr);
-  else openNewEventOnDate(dateStr);
+  if(document.getElementById('tabDetail')){document.getElementById('tabDetail').classList.add('active');document.getElementById('tabPaste').classList.remove('active');}
+  const dayEvs=events[ds]||[];
+  if(dayEvs.length>0)openEventDetail(dayEvs[0].id,ds);else openNewEventOnDate(ds);
 }
-function openEventDetail(evId,dateStr){
-  selectedDate=dateStr||selectedDate; selectedEventId=evId;
+function openEventDetail(evId,ds){
+  selectedDate=ds||selectedDate;selectedEventId=evId;
   document.querySelectorAll('.cal-cell').forEach(c=>c.classList.remove('selected'));
-  const cell=document.querySelector('[data-date="'+(dateStr||selectedDate)+'"]'); if(cell)cell.classList.add('selected');
-  const ev=(events[dateStr||selectedDate]||[]).find(e=>e.id===evId); if(!ev)return;
+  const cell=document.querySelector('[data-date="'+(ds||selectedDate)+'"]');if(cell)cell.classList.add('selected');
+  const ev=(events[ds||selectedDate]||[]).find(e=>e.id===evId);if(!ev)return;
   currentTab='detail';
-  showDetailForm(ev,dateStr||selectedDate);
+  showDetailForm(ev,ds||selectedDate);
 }
 function openNewEvent(){selectedEventId=null;currentTab='detail';showDetailForm(null,selectedDate||fmtDate(today));}
-function openNewEventOnDate(dateStr){selectedEventId=null;currentTab='detail';showDetailForm(null,dateStr);}
-function showDetailForm(ev,dateStr){
-  if(!dateStr)dateStr=fmtDate(today);
-  const d=new Date(dateStr);
+function openNewEventOnDate(ds){selectedEventId=null;currentTab='detail';showDetailForm(null,ds);}
+
+function showDetailForm(ev,ds){
+  if(!ds)ds=fmtDate(today);
+  const d=new Date(ds);
   document.getElementById('detailDateLabel').textContent=(d.getMonth()+1)+'월 '+d.getDate()+'일';
   const body=document.getElementById('detailBody');
-  const fields=[
-    ['date','기일','date',dateStr||''],['time','기일시간','time',ev?ev.time:''],
-    ['court','법원명','text',ev?ev.court:''],['caseNo','사건번호','text',ev?ev.caseNo:''],
-    ['div','재판부','text',ev?ev.div:''],['type','종류','select',ev?ev.type:'변론',['변론','조정','선고','기타']],
-    ['loc','기일장소','text',ev?ev.loc:''],['plaintiff','원고','text',ev?ev.plaintiff:''],
-    ['defendant','피고','text',ev?ev.defendant:''],['delegation','위임여부','select',ev?ev.delegation:'Y',['Y','N']],
-    ['attendee','출석자','text',ev?ev.attendee:''],['status','진행상황','text',ev?ev.status:''],
-    ['memo','메모(서면제출기한/마감일 등)','textarea',ev?ev.memo:''],
-    ['flagType','알림구분','select',ev?ev.flagType:'',['','deadline','alert']],
-  ];
-  let html='';
-  const dayEvs=events[dateStr]||[];
+
+  // 사건 이력
+  let histHtml='';
+  if(ev&&ev.caseNo){
+    const hist=getCaseHistory(ev.caseNo);
+    const cnt=getCaseCount(ev.caseNo,ev.date);
+    if(hist&&hist.history.length>1){
+      histHtml='<div class="case-history"><div class="case-history-title">📁 사건이력 ('+hist.history.length+'건)</div>';
+      hist.history.slice(-3).forEach(h=>{
+        const isThis=h.date===ev.date&&h.time===ev.time;
+        histHtml+='<div class="case-history-item'+(isThis?' active':'')+'" style="'+(isThis?'font-weight:700;':'')+'"><span class="case-history-date">'+h.date+'</span> '+escHtml(h.type)+' '+escHtml(h.loc)+(h.status?'<br><span style="color:var(--muted)">'+escHtml(h.status)+'</span>':'')+'</div>';
+      });
+      if(hist.history.length>3)histHtml+='<div style="font-size:0.67rem;color:var(--muted);margin-top:3px;">... 외 '+(hist.history.length-3)+'건</div>';
+      histHtml+='</div>';
+    }
+  }
+
+  // 다른 일정 목록
+  const dayEvs=events[ds]||[];
+  let listHtml='';
   if(dayEvs.length>1){
-    html='<div style="margin-bottom:10px;"><div class="form-label">이 날의 다른 일정</div>';
+    listHtml='<div style="margin-bottom:9px;"><div class="form-label">이 날의 다른 일정</div>';
     dayEvs.forEach(e=>{
       const isA=e.id===(ev?ev.id:null);
-      const opName=getOpponent(e);
-      html+='<div style="display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:4px;cursor:pointer;background:'+(isA?'rgba(201,168,76,0.15)':'transparent')+'" onclick="openEventDetail('+JSON.stringify(e.id)+',\''+dateStr+'\')">';
-      html+='<span style="font-size:0.7rem;color:var(--muted)">'+(e.time||'--:--')+'</span>';
-      html+='<span style="font-size:0.77rem;font-weight:'+(isA?'700':'400')+'">'+escHtml(opName)+'</span>';
-      html+='<span class="badge badge-'+(e.type||'기타')+'" style="margin-left:auto">'+(e.type||'기타')+'</span></div>';
+      const opName=e.type==='마감'?(e.memo||'마감'):getOpponent(e);
+      // 수정2: onclick을 data 속성으로 처리하여 클릭 버그 방지
+      listHtml+='<div class="other-ev-item" data-evid="'+e.id+'" data-ds="'+ds+'" style="display:flex;align-items:center;gap:5px;padding:4px 6px;border-radius:4px;cursor:pointer;background:'+(isA?'rgba(201,168,76,0.15)':'transparent')+'">';
+      listHtml+='<span style="font-size:0.68rem;color:var(--muted)">'+(e.time||'--:--')+'</span>';
+      listHtml+='<span style="font-size:0.75rem;font-weight:'+(isA?'700':'400')+'">'+escHtml(opName)+'</span>';
+      listHtml+='<span class="badge badge-'+(e.type||'기타')+'" style="margin-left:auto">'+(e.type||'기타')+'</span></div>';
     });
-    html+='</div><hr class="section-divider">';
+    listHtml+='</div><hr class="section-divider">';
   }
+
+  // 마감일 섹션
+  let deadlineHtml='';
+  if(ev&&ev.type==='선고'){
+    deadlineHtml=`<div class="deadline-section"><div class="deadline-title">⏰ 판결 후 마감 관리</div>
+      <div class="deadline-row"><label>판결문 송달일</label><input type="date" class="form-control" id="f_verdictDate" value="${escHtml(ev.verdictDate||'')}" style="flex:1;"></div>
+      <div style="font-size:0.68rem;color:var(--muted);margin-top:2px;">송달일 입력 시 2주 후 상소마감일이 자동 등록됩니다</div></div>`;
+  }
+
+  const fields=[
+    ['date','기일','date',ds||''],['time','기일시간','time',ev?ev.time:''],
+    ['court','법원명','text',ev?ev.court:''],['caseNo','사건번호','text',ev?ev.caseNo:''],
+    ['div','재판부','text',ev?ev.div:''],['type','종류','select',ev?ev.type:'변론',['변론','조정','선고','기타']],
+    ['loc','기일장소','text',ev?cleanLoc(ev.loc):''],['plaintiff','원고','text',ev?ev.plaintiff:''],
+    ['defendant','피고','text',ev?ev.defendant:''],['delegation','위임여부','select',ev?ev.delegation:'Y',['Y','N']],
+    ['attendee','출석자','text',ev?ev.attendee:''],['status','진행상황','text',ev?ev.status:''],
+    ['memo','메모(마감일 등)','textarea',ev?ev.memo:''],
+    ['flagType','알림구분','select',ev?ev.flagType:'',['','deadline','alert']],
+  ];
+  let formHtml='';
   fields.forEach(([name,label,type,val,opts])=>{
-    html+='<div class="form-group"><label class="form-label">'+label+'</label>';
-    if(type==='select'){html+='<select class="form-control" id="f_'+name+'">';opts.forEach(o=>html+='<option value="'+o+'"'+(val===o?' selected':'')+'>'+o+'</option>');html+='</select>';}
-    else if(type==='textarea')html+='<textarea class="form-control" id="f_'+name+'" rows="3">'+escHtml(val)+'</textarea>';
-    else html+='<input class="form-control" type="'+type+'" id="f_'+name+'" value="'+escHtml(val)+'">';
-    html+='</div>';
+    formHtml+='<div class="form-group"><label class="form-label">'+label+'</label>';
+    if(type==='select'){formHtml+='<select class="form-control" id="f_'+name+'">';opts.forEach(o=>formHtml+='<option value="'+o+'"'+(val===o?' selected':'')+'>'+o+'</option>');formHtml+='</select>';}
+    else if(type==='textarea')formHtml+='<textarea class="form-control" id="f_'+name+'" rows="2">'+escHtml(val)+'</textarea>';
+    else formHtml+='<input class="form-control" type="'+type+'" id="f_'+name+'" value="'+escHtml(val)+'">';
+    formHtml+='</div>';
   });
-  body.innerHTML=html;
+
+  body.innerHTML=histHtml+listHtml+deadlineHtml+formHtml;
   document.getElementById('detailActions').style.display='flex';
-  const df=document.getElementById('f_date'); if(df)df.addEventListener('change',e=>{selectedDate=e.target.value;});
+
+  // 수정2: 이벤트 위임으로 다른 일정 클릭 처리
+  body.querySelectorAll('.other-ev-item').forEach(el=>{
+    el.addEventListener('click',function(){
+      const eid=this.dataset.evid;
+      const dds=this.dataset.ds;
+      // ID 타입 맞추기 (숫자 또는 문자열)
+      const allEvs=events[dds]||[];
+      const target=allEvs.find(e=>String(e.id)===String(eid));
+      if(target)openEventDetail(target.id,dds);
+    });
+  });
+
+  const df=document.getElementById('f_date');if(df)df.addEventListener('change',e=>{selectedDate=e.target.value;});
   if(window.innerWidth<=768){syncMobileDetail();openMobileSheet();}
 }
-function escHtml(str){if(!str)return'';return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
 async function saveEvent(){
   const get=id=>{const el=document.getElementById('f_'+id);return el?el.value:'';};
-  const dateStr=get('date')||selectedDate; if(!dateStr){alert('날짜를 입력하세요.');return;}
-  const ev={id:selectedEventId||(Date.now()+Math.random()),date:dateStr,time:get('time'),court:get('court'),caseNo:get('caseNo'),div:get('div'),type:get('type'),loc:get('loc'),plaintiff:get('plaintiff'),defendant:get('defendant'),delegation:get('delegation'),attendee:get('attendee'),status:get('status'),memo:get('memo'),flagType:get('flagType')};
+  const ds=get('date')||selectedDate;if(!ds){alert('날짜를 입력하세요.');return;}
+  const verdictDate=get('verdictDate')||'';
+  const ev={id:selectedEventId||(Date.now()+Math.random()),date:ds,time:get('time'),court:get('court'),caseNo:get('caseNo'),div:get('div'),type:get('type'),loc:cleanLoc(get('loc')),plaintiff:get('plaintiff'),defendant:get('defendant'),delegation:get('delegation'),attendee:get('attendee'),status:get('status'),memo:get('memo'),flagType:get('flagType'),verdictDate,appealDeadline:''};
   if(selectedEventId){Object.keys(events).forEach(dk=>{events[dk]=events[dk].filter(e=>e.id!==selectedEventId);if(events[dk].length===0)delete events[dk];});}
-  if(!events[dateStr])events[dateStr]=[];
-  events[dateStr].push(ev); selectedEventId=ev.id; selectedDate=dateStr;
-  await saveToStorage(); scheduleNotifications(); renderCalendar(); renderScheduleTable(); openEventDetail(ev.id,dateStr);
+  if(!events[ds])events[ds]=[];
+  events[ds].push(ev);
+  selectedEventId=ev.id;selectedDate=ds;
+  updateCaseDB(ev);
+  if(verdictDate)checkAndAddAppealDeadline(ev);
+  await saveToStorage();scheduleNotifications();renderCalendar();renderScheduleTable();openEventDetail(ev.id,ds);
 }
 async function deleteEvent(){
-  if(!selectedEventId)return; if(!confirm('이 일정을 삭제하시겠습니까?'))return;
+  if(!selectedEventId)return;if(!confirm('이 일정을 삭제하시겠습니까?'))return;
   Object.keys(events).forEach(dk=>{events[dk]=events[dk].filter(e=>e.id!==selectedEventId);if(events[dk].length===0)delete events[dk];});
-  selectedEventId=null; await saveToStorage(); renderCalendar(); renderScheduleTable();
+  selectedEventId=null;await saveToStorage();renderCalendar();renderScheduleTable();
   document.getElementById('detailBody').innerHTML='<div class="detail-empty"><div class="detail-empty-icon">📅</div><div>일정이 삭제되었습니다</div></div>';
   document.getElementById('detailActions').style.display='none';
 }
 
-// ─── 하단 테이블 ─────────────────────────────────────────
+// ════════════════════════════════════════════════════════
+// 붙여넣기
+// ════════════════════════════════════════════════════════
+const parsedRowsMap={};
+function showPasteContent(bodyId,actionsId){
+  const ds=selectedDate||fmtDate(today);
+  const body=document.getElementById(bodyId);
+  const actions=document.getElementById(actionsId);
+  if(actions)actions.innerHTML='';
+  const uid=bodyId==='detailBody'?'inline':'mobile';
+  body.innerHTML=`<div class="inline-paste-area">
+    <div class="form-group"><label class="form-label">기일 날짜</label>
+      <input type="date" class="form-control" id="${uid}PasteDate" value="${ds}" style="max-width:180px;"></div>
+    <div class="form-group"><label class="form-label">법원 시스템에서 복사 → 붙여넣기</label>
+      <textarea class="form-control" id="${uid}PasteText" rows="7" placeholder="법원   사건번호   재판부   기일종류   기일시간   기일장소   원고   피고"></textarea></div>
+    <div id="${uid}PastePreview" style="display:none;margin-bottom:7px;">
+      <div class="form-label" style="margin-bottom:3px;">미리보기</div>
+      <div id="${uid}PastePreviewContent" style="font-size:0.7rem;background:var(--paper-dark);border-radius:5px;padding:7px;max-height:120px;overflow-y:auto;border:1px solid var(--border);"></div></div>
+    <div style="display:flex;gap:7px;">
+      <button class="btn-new" onclick="pastePreview('${uid}')" style="flex:1;">미리보기</button>
+      <button class="btn-save" id="${uid}ImportBtn" onclick="pasteImport('${uid}')" style="flex:1;display:none;">✅ 가져오기</button>
+    </div></div>`;
+}
+function parseCourt(text){
+  const lines=text.trim().split('\n').map(l=>l.trim()).filter(Boolean);
+  const hk=['법원','사건번호','재판부','기일종류','기일시간','기일장소','원고','피고'];
+  const rows=[];
+  lines.forEach(line=>{
+    const cols=line.split('\t').map(c=>c.trim());if(cols.length<4)return;
+    if(hk.filter(k=>cols.join('').includes(k)).length>=3)return;
+    const typeRaw=cols[3]||'';let type='기타';
+    if(typeRaw.includes('변론'))type='변론';else if(typeRaw.includes('조정'))type='조정';else if(typeRaw.includes('선고'))type='선고';
+    rows.push({court:cols[0]||'',caseNo:cols[1]||'',div:cols[2]||'',type,time:(cols[4]||'').replace(/[^0-9:]/g,'').substring(0,5),loc:cleanLoc(cols[5]||''),plaintiff:cols[6]||'',defendant:cols[7]||''});
+  });
+  return rows;
+}
+function pastePreview(uid){
+  const text=document.getElementById(uid+'PasteText').value;if(!text.trim()){alert('내용을 붙여넣어 주세요.');return;}
+  parsedRowsMap[uid]=parseCourt(text);if(!parsedRowsMap[uid].length){alert('파싱된 일정이 없습니다.');return;}
+  document.getElementById(uid+'PastePreviewContent').innerHTML=parsedRowsMap[uid].map((r,i)=>`<div style="padding:2px 0;border-bottom:1px solid var(--border);display:flex;gap:5px;align-items:center;flex-wrap:wrap"><b>${i+1}</b><b>${r.time||'-'}</b><span style="color:#2980b9">${escHtml(r.court)}</span><span style="font-size:0.67rem">${escHtml(r.caseNo)}</span><span class="badge badge-${r.type}">${r.type}</span><span>${escHtml(r.plaintiff)} vs ${escHtml(r.defendant)}</span></div>`).join('');
+  document.getElementById(uid+'PastePreview').style.display='block';
+  document.getElementById(uid+'ImportBtn').style.display='block';
+}
+async function pasteImport(uid){
+  const ds=document.getElementById(uid+'PasteDate').value;if(!ds){alert('날짜를 입력해 주세요.');return;}
+  const rows=parsedRowsMap[uid]||[];if(!rows.length){alert('먼저 미리보기를 눌러주세요.');return;}
+  let added=0;const dupCases=[];
+  rows.forEach(r=>{
+    if(!events[ds])events[ds]=[];
+    const dup=events[ds].find(e=>e.caseNo===r.caseNo&&e.time===r.time);
+    if(!dup){
+      const ev={id:Date.now()+Math.random(),date:ds,...r,delegation:'Y',attendee:'',status:'',memo:'',flagType:'',verdictDate:'',appealDeadline:''};
+      events[ds].push(ev);
+      added++;
+      // 사건 DB 중복 체크 및 이력 추가
+      const prevHist=getCaseHistory(r.caseNo);
+      const prevCnt=prevHist?prevHist.history.length:0;
+      updateCaseDB(ev);
+      if(prevCnt>0){
+        const prev=prevHist.history[prevCnt-1];
+        dupCases.push({ev,prevCnt,prev});
+      }
+    }
+  });
+  await saveToStorage();renderCalendar();renderScheduleTable();
+  parsedRowsMap[uid]=[];
+  // 중복 사건 팝업
+  if(dupCases.length>0){
+    const dc=dupCases[0];
+    const nth=dc.prevCnt+1;
+    const suffix=['번째','번째','번째','번째','번째'];
+    document.getElementById('caseDupTitle').textContent='📌 기존 사건 발견 - '+escHtml(dc.ev.caseNo);
+    document.getElementById('caseDupMsg').textContent=dc.ev.date+' 이후 '+nth+'번째 기일입니다.';
+    document.getElementById('caseDupPrev').innerHTML='직전 진행: <b>'+escHtml(dc.prev.date)+'</b> '+escHtml(dc.prev.type)+' '+escHtml(dc.prev.loc)+(dc.prev.status?'<br>'+escHtml(dc.prev.status):'');
+    document.getElementById('caseDupModal').classList.add('show');
+  }
+  alert('✅ '+added+'개 일정을 가져왔습니다!');
+  switchTab('detail');
+  if(uid==='mobile')closeMobileSheet();
+}
+function closeCaseDupModal(){document.getElementById('caseDupModal').classList.remove('show');}
+
+// ════════════════════════════════════════════════════════
+// 하단 테이블
+// ════════════════════════════════════════════════════════
 function renderScheduleTable(){
-  const tbody=document.getElementById('scheduleBody'); tbody.innerHTML='';
+  const tbody=document.getElementById('scheduleBody');tbody.innerHTML='';
   const all=[];
-  Object.entries(events).forEach(([dk,evs])=>{const d=new Date(dk);if(d.getFullYear()===currentYear&&d.getMonth()===currentMonth)evs.forEach(ev=>all.push({...ev,_d:d}));});
-  all.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+  Object.entries(events).forEach(([dk,evs])=>{const d=new Date(dk);if(d.getFullYear()===currentYear&&d.getMonth()===currentMonth)evs.forEach(ev=>{if(ev.type!=='마감')all.push({...ev,_d:d});});});
+  all.sort((a,b)=>(a.date+(a.time||'zz')).localeCompare(b.date+(b.time||'zz')));
   if(all.length===0){tbody.innerHTML='<tr class="empty-row"><td colspan="12">이번 달 등록된 일정이 없습니다</td></tr>';return;}
   all.forEach(ev=>{
-    const tr=document.createElement('tr'); const d=new Date(ev.date);
-    tr.innerHTML=`<td>${d.getMonth()+1}/${d.getDate()} (${['일','월','화','수','목','금','토'][d.getDay()]})</td><td>${escHtml(ev.time)||'-'}</td><td>${escHtml(ev.court)||'-'}</td><td style="font-size:0.68rem">${escHtml(ev.caseNo)||'-'}</td><td>${escHtml(ev.div)||'-'}</td><td><span class="badge badge-${ev.type||'기타'}">${ev.type||'-'}</span></td><td>${escHtml(ev.loc)||'-'}</td><td>${escHtml(ev.plaintiff)||'-'}</td><td>${escHtml(ev.defendant)||'-'}</td><td><span class="badge badge-위임${ev.delegation||'N'}">${ev.delegation||'-'}</span></td><td>${escHtml(ev.attendee)||'-'}</td><td style="font-size:0.7rem">${escHtml(ev.status)||'-'}</td>`;
+    const tr=document.createElement('tr');const d=new Date(ev.date);
+    tr.innerHTML=`<td>${d.getMonth()+1}/${d.getDate()} (${['일','월','화','수','목','금','토'][d.getDay()]})</td><td>${escHtml(ev.time)||'-'}</td><td>${escHtml(ev.court)||'-'}</td><td style="font-size:0.66rem">${escHtml(ev.caseNo)||'-'}</td><td>${escHtml(ev.div)||'-'}</td><td><span class="badge badge-${ev.type||'기타'}">${ev.type||'-'}</span></td><td style="font-size:0.66rem">${escHtml(cleanLoc(ev.loc))||'-'}</td><td>${escHtml(ev.plaintiff)||'-'}</td><td>${escHtml(ev.defendant)||'-'}</td><td><span class="badge badge-위임${ev.delegation||'N'}">${ev.delegation||'-'}</span></td><td>${escHtml(ev.attendee)||'-'}</td><td style="font-size:0.66rem">${escHtml(ev.status)||'-'}</td>`;
     tr.addEventListener('click',()=>{currentYear=d.getFullYear();currentMonth=d.getMonth();renderCalendar();setTimeout(()=>openEventDetail(ev.id,ev.date),50);});
     tbody.appendChild(tr);
   });
 }
 
-// ─── D-Day ───────────────────────────────────────────────
+// ════════════════════════════════════════════════════════
+// D-Day
+// ════════════════════════════════════════════════════════
 function openDDayModal(){
   document.getElementById('ddayDateInfo').textContent='오늘: '+(today.getMonth()+1)+'월 '+today.getDate()+'일 ('+['일','월','화','수','목','금','토'][today.getDay()]+')';
-  const list=document.getElementById('ddayList'); list.innerHTML='';
+  const list=document.getElementById('ddayList');list.innerHTML='';
   const upcoming=[];
+  // 일반 일정
   Object.entries(events).forEach(([dk,evs])=>{
-    const d=new Date(dk); const diff=Math.ceil((d-today)/86400000);
-    if(diff>=-1&&diff<=30)evs.forEach(ev=>{if(ev.flagType==='deadline'||ev.flagType==='alert'||(ev.memo&&ev.memo.trim()))upcoming.push({...ev,diff,_d:d});});
+    const d=new Date(dk);const diff=Math.ceil((d-today)/86400000);
+    if(diff>=-1&&diff<=30)evs.forEach(ev=>{
+      if(ev.type==='마감'){upcoming.push({...ev,diff,_d:d,isDl:true});}
+      else if(ev.flagType==='deadline'||ev.flagType==='alert'||(ev.memo&&ev.memo.trim()))upcoming.push({...ev,diff,_d:d});
+    });
   });
   Object.entries(events).forEach(([dk,evs])=>{
-    const d=new Date(dk); const diff=Math.ceil((d-today)/86400000);
+    const d=new Date(dk);const diff=Math.ceil((d-today)/86400000);
     if(diff>=0&&diff<=7)evs.forEach(ev=>{if(!upcoming.find(u=>u.id===ev.id))upcoming.push({...ev,diff,_d:d});});
   });
+  // 마감일
+  deadlines.forEach(dl=>{
+    const d=new Date(dl.date);const diff=Math.ceil((d-today)/86400000);
+    if(diff>=-1&&diff<=30&&!upcoming.find(u=>u.id==='dl-'+dl.id))
+      upcoming.push({id:'dl-'+dl.id,title:dl.title,date:dl.date,diff,_d:d,isDl:true,type:'마감',time:'',court:'',caseNo:dl.caseNo,memo:'',plaintiff:'',defendant:''});
+  });
   upcoming.sort((a,b)=>a.diff-b.diff);
-  if(upcoming.length===0)list.innerHTML='<div class="dday-none">향후 30일 이내 특이 알림 일정이 없습니다</div>';
-  else upcoming.forEach(ev=>{
+  if(upcoming.length===0){list.innerHTML='<div class="dday-none">향후 30일 이내 특이 알림 일정이 없습니다</div>';document.getElementById('ddayModal').classList.add('show');return;}
+  upcoming.forEach(ev=>{
     const item=document.createElement('div');
-    item.className='dday-item'+(ev.diff<=2?' urgent':ev.diff<=7?' warning':'');
+    item.className='dday-item'+(ev.isDl?' deadline-item':ev.diff<=2?' urgent':ev.diff<=7?' warning':'');
     const ddayText=ev.diff===0?'D-Day':ev.diff<0?'D+'+Math.abs(ev.diff):'D-'+ev.diff;
-    const opName=getOpponent(ev);
-    item.innerHTML=`<div class="dday-badge">${ddayText}</div><div class="dday-item-info"><div class="dday-item-title">${escHtml(opName)} ${escHtml(ev.type||'')} ${ev.time?'('+ev.time+')':''}</div><div class="dday-item-desc">${ev._d.getMonth()+1}/${ev._d.getDate()} · ${escHtml(ev.court||'')} ${escHtml(ev.caseNo||'')}</div>${ev.memo?'<div class="dday-item-desc" style="color:#c0392b;margin-top:3px">📌 '+escHtml(ev.memo)+'</div>':''}</div>`;
+    const label=ev.title||(getOpponent(ev)||'')+' '+(ev.type||'');
+    item.innerHTML=`<div class="dday-badge">${ddayText}</div><div class="dday-item-info"><div class="dday-item-title">${escHtml(label.trim())} ${ev.time?'('+ev.time+')':''}</div><div class="dday-item-desc">${ev._d.getMonth()+1}/${ev._d.getDate()}${ev.court?' · '+escHtml(ev.court):''}${ev.caseNo?' '+escHtml(ev.caseNo):''}</div>${ev.memo?'<div class="dday-item-desc" style="color:#c0392b;margin-top:2px">📌 '+escHtml(ev.memo)+'</div>':''}</div>`;
     list.appendChild(item);
   });
   document.getElementById('ddayModal').classList.add('show');
 }
 function closeDDayModal(){document.getElementById('ddayModal').classList.remove('show');}
 
-// ─── 모바일 시트 ─────────────────────────────────────────
+// ════════════════════════════════════════════════════════
+// 모바일
+// ════════════════════════════════════════════════════════
 function openMobileSheet(){
   if(window.innerWidth>768)return;
   document.getElementById('mobileOverlay').style.display='block';
@@ -755,6 +1049,15 @@ function syncMobileDetail(){
   const body=document.getElementById('mobileDetailBody');
   const src=document.getElementById('detailBody');
   if(src)body.innerHTML=src.innerHTML;
+  // 이벤트 재바인딩
+  body.querySelectorAll('.other-ev-item').forEach(el=>{
+    el.addEventListener('click',function(){
+      const eid=this.dataset.evid;const dds=this.dataset.ds;
+      const allEvs=events[dds]||[];
+      const target=allEvs.find(e=>String(e.id)===String(eid));
+      if(target){openEventDetail(target.id,dds);syncMobileDetail();}
+    });
+  });
   const actions=document.getElementById('mobileDetailActions');
   if(actions)actions.innerHTML=selectedEventId?'<button class="btn-save" style="flex:1;" onclick="saveMobileEvent()">저장</button><button class="btn-delete" onclick="deleteMobileEvent()">삭제</button>':'';
 }
@@ -763,33 +1066,143 @@ function deleteMobileEvent(){deleteEvent();closeMobileSheet();}
 function scrollToCalendar(){window.scrollTo({top:0,behavior:'smooth'});}
 function scrollToTable(){document.querySelector('.schedule-table-wrap').scrollIntoView({behavior:'smooth'});}
 
-// ─── 백업 / 복원 ─────────────────────────────────────────
-function backupData(){
-  const blob=new Blob([JSON.stringify(events,null,2)],{type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  const now=new Date(); a.download='재판일정_백업_'+now.getFullYear()+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0')+'.json';
-  a.click(); URL.revokeObjectURL(a.href);
+// ════════════════════════════════════════════════════════
+// 검색
+// ════════════════════════════════════════════════════════
+function onSearchInput(val){
+  const q=val.trim();
+  if(q.length<1){closeSearchDrop();return;}
+  const results=searchCases(q);
+  renderSearchDrop(results,q);
 }
-function restoreData(e){
-  const file=e.target.files[0]; if(!file)return;
-  const reader=new FileReader();
-  reader.onload=function(ev){try{const data=JSON.parse(ev.target.result);if(confirm('백업 파일을 불러오면 현재 데이터가 덮어씌워집니다.\n계속하시겠습니까?')){events=data;saveToStorage();renderCalendar();renderScheduleTable();alert('✅ 복원 완료!');}}catch(err){alert('올바른 백업 파일이 아닙니다.');}};
-  reader.readAsText(file); e.target.value='';
+function searchCases(q){
+  const ql=q.toLowerCase();
+  const matched=[];
+  // caseDB에서 검색
+  Object.entries(caseDB).forEach(([key,c])=>{
+    const matchCase=(c.caseNo||'').toLowerCase().includes(ql);
+    const matchP=(c.plaintiff||'').toLowerCase().includes(ql);
+    const matchD=(c.defendant||'').toLowerCase().includes(ql);
+    if(matchCase||matchP||matchD)matched.push({...c,_key:key});
+  });
+  // caseDB에 없는 일정도 events에서 검색
+  const foundKeys=new Set(matched.map(m=>m._key));
+  Object.values(events).flat().forEach(ev=>{
+    if(!ev.caseNo)return;
+    const key=ev.caseNo.split(' ')[0];
+    if(foundKeys.has(key))return;
+    const matchCase=(ev.caseNo||'').toLowerCase().includes(ql);
+    const matchP=(ev.plaintiff||'').toLowerCase().includes(ql);
+    const matchD=(ev.defendant||'').toLowerCase().includes(ql);
+    if(matchCase||matchP||matchD){
+      foundKeys.add(key);
+      matched.push({caseNo:ev.caseNo,plaintiff:ev.plaintiff,defendant:ev.defendant,history:[],_key:key,_fromEvents:true});
+    }
+  });
+  return matched.slice(0,10);
+}
+function renderSearchDrop(results,q){
+  const drop=document.getElementById('searchDropdown');
+  if(results.length===0){
+    drop.innerHTML='<div class="search-empty">검색 결과가 없습니다</div>';
+    drop.classList.add('show');return;
+  }
+  drop.innerHTML=results.map((c,i)=>{
+    const cnt=c.history?c.history.length:0;
+    const lastDate=cnt>0?c.history[cnt-1].date:'';
+    return`<div class="search-result-item" data-idx="${i}" onmousedown="openCaseModal('${escHtml(c._key)}')">
+      <div class="sri-case">${highlight(escHtml(c.caseNo||''),q)}</div>
+      <div class="sri-parties">${highlight(escHtml(c.plaintiff||''),q)} vs ${highlight(escHtml(c.defendant||''),q)}</div>
+      ${cnt>0?`<div class="sri-count">기일 ${cnt}건 · 최근: ${lastDate}</div>`:'<div class="sri-count" style="color:var(--muted)">등록된 기일 없음</div>'}
+    </div>`;
+  }).join('');
+  drop.classList.add('show');
+}
+function highlight(text,q){
+  if(!q)return text;
+  const regex=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+  return text.replace(regex,'<mark style="background:rgba(201,168,76,0.3);border-radius:2px;padding:0 1px;">$1</mark>');
+}
+function closeSearchDrop(){
+  document.getElementById('searchDropdown').classList.remove('show');
+}
+function onSearchKey(e){
+  if(e.key==='Escape'){closeSearchDrop();document.getElementById('searchInput').blur();}
+  if(e.key==='Enter'){
+    const val=document.getElementById('searchInput').value.trim();
+    if(val){const results=searchCases(val);if(results.length>0)openCaseModal(results[0]._key);}
+  }
 }
 
-// ─── 법원 붙여넣기 파싱 ──────────────────────────────────
-function parseCourt(text){
-  const lines=text.trim().split('\n').map(l=>l.trim()).filter(Boolean);
-  const hk=['법원','사건번호','재판부','기일종류','기일시간','기일장소','원고','피고'];
-  const rows=[];
-  lines.forEach(line=>{
-    const cols=line.split('\t').map(c=>c.trim()); if(cols.length<4)return;
-    if(hk.filter(k=>cols.join('').includes(k)).length>=3)return;
-    const typeRaw=cols[3]||''; let type='기타';
-    if(typeRaw.includes('변론'))type='변론'; else if(typeRaw.includes('조정'))type='조정'; else if(typeRaw.includes('선고'))type='선고';
-    rows.push({court:cols[0]||'',caseNo:cols[1]||'',div:cols[2]||'',type,time:(cols[4]||'').replace(/[^0-9:]/g,'').substring(0,5),loc:cols[5]||'',plaintiff:cols[6]||'',defendant:cols[7]||''});
-  });
-  return rows;
+// ════════════════════════════════════════════════════════
+// 사건 이력 모달
+// ════════════════════════════════════════════════════════
+function openCaseModal(caseKey){
+  closeSearchDrop();
+  document.getElementById('searchInput').value='';
+  // caseDB에서 찾기
+  let c=caseDB[caseKey];
+  // 없으면 events에서 조합
+  if(!c){
+    const allEvs=Object.values(events).flat().filter(ev=>ev.caseNo&&ev.caseNo.split(' ')[0]===caseKey);
+    if(allEvs.length===0)return;
+    c={caseNo:allEvs[0].caseNo,plaintiff:allEvs[0].plaintiff,defendant:allEvs[0].defendant,history:allEvs.map(ev=>({date:ev.date,time:ev.time,type:ev.type,loc:cleanLoc(ev.loc),status:ev.status,memo:ev.memo}))};
+    c.history.sort((a,b)=>a.date.localeCompare(b.date));
+  }
+  document.getElementById('caseModalNo').textContent=c.caseNo||caseKey;
+  document.getElementById('caseModalParties').textContent=(c.plaintiff||'')+(c.plaintiff&&c.defendant?' vs ':'')+(c.defendant||'');
+  const body=document.getElementById('caseModalBody');
+  if(!c.history||c.history.length===0){
+    body.innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);font-size:0.82rem;">등록된 기일 이력이 없습니다</div>';
+  }else{
+    // 마감일도 함께 표시
+    const dlItems=deadlines.filter(d=>d.caseNo&&d.caseNo.split(' ')[0]===caseKey).map(d=>({date:d.date,time:'',type:'마감',loc:'',status:'',memo:d.title,isDl:true}));
+    const allItems=[...c.history,...dlItems].sort((a,b)=>a.date.localeCompare(b.date));
+    body.innerHTML='<div class="case-timeline">'+allItems.map((h,i)=>{
+      const isLast=i===allItems.length-1;
+      const typeColor={변론:'type-변론',조정:'type-조정',선고:'type-선고',마감:'type-마감'}[h.type]||'';
+      return`<div class="timeline-item">
+        <div class="timeline-dot">
+          <div class="tl-dot ${typeColor}"></div>
+          ${!isLast?'<div class="tl-line"></div>':''}
+        </div>
+        <div class="timeline-content">
+          <div class="tl-date">${h.date} ${h.time?'· '+h.time:''}</div>
+          <div class="tl-type"><span class="badge badge-${h.type||'기타'}" style="margin-right:5px;">${h.type||'기타'}</span>${escHtml(h.loc||'')}</div>
+          ${h.status?'<div class="tl-status">'+escHtml(h.status)+'</div>':''}
+          ${h.memo?'<div class="tl-memo">📌 '+escHtml(h.memo)+'</div>':''}
+        </div>
+      </div>`;
+    }).join('')+'</div>';
+  }
+  document.getElementById('caseModal').classList.add('show');
+}
+function closeCaseModal(){document.getElementById('caseModal').classList.remove('show');}
+
+// ════════════════════════════════════════════════════════
+// 백업 / 복원
+// ════════════════════════════════════════════════════════
+function backupData(){
+  const blob=new Blob([JSON.stringify({events,caseDB,deadlines},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  const now=new Date();a.download='재판일정_백업_'+now.getFullYear()+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0')+'.json';
+  a.click();URL.revokeObjectURL(a.href);
+}
+function restoreData(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      const data=JSON.parse(ev.target.result);
+      if(confirm('백업 파일을 불러오면 현재 데이터가 덮어씌워집니다.\n계속하시겠습니까?')){
+        if(data.events)events=data.events;else events=data;
+        if(data.caseDB)caseDB=data.caseDB;
+        if(data.deadlines)deadlines=data.deadlines;
+        saveToStorage();renderCalendar();renderScheduleTable();alert('✅ 복원 완료!');
+      }
+    }catch(err){alert('올바른 백업 파일이 아닙니다.');}
+  };
+  reader.readAsText(file);e.target.value='';
 }
 </script>
 </body>
