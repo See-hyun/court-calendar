@@ -222,6 +222,9 @@ textarea.form-control{resize:vertical;min-height:50px;}
 .mobile-nav-btn{background:none;border:none;color:rgba(255,255,255,0.5);font-size:0.62rem;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:3px 7px;font-family:'Noto Sans KR',sans-serif;}
 .mobile-nav-btn .nav-icon{font-size:1.1rem;}
 .mobile-nav-btn.active{color:var(--gold);}
+/* 토스트 알림 */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--gold);padding:10px 22px;border-radius:20px;font-size:0.82rem;font-weight:700;border:1px solid rgba(201,168,76,0.4);opacity:0;transition:all 0.3s;z-index:9999;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
 @media(max-width:768px){
   .app-header{padding:9px 12px;}
@@ -420,6 +423,8 @@ textarea.form-control{resize:vertical;min-height:50px;}
   <button class="mobile-nav-btn" onclick="backupData()"><span class="nav-icon">💾</span>백업</button>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
 // ════════════════════════════════════════════════════════
 // 설정
@@ -474,6 +479,11 @@ const today=new Date();
 
 function showSyncStatus(msg,color){const el=document.getElementById('syncStatus');if(el){el.textContent=msg;el.style.color=color||'rgba(255,255,255,0.4)';}}
 function showLastModified(when){const el=document.getElementById('lastModified');if(el&&when)el.textContent='최종수정: '+when;}
+function showToast(msg){
+  const t=document.getElementById('toast');if(!t)return;
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
 
 // ════════════════════════════════════════════════════════
 // Init
@@ -750,7 +760,13 @@ function switchTab(tab){
   currentTab=tab;
   document.getElementById('tabDetail').classList.toggle('active',tab==='detail');
   document.getElementById('tabPaste').classList.toggle('active',tab==='paste');
-  if(tab==='detail')showDetailContent();else showPasteContent('detailBody','detailActions');
+  if(tab==='detail'){
+    showDetailContent();
+    // 저장/삭제 버튼 복원
+    document.getElementById('detailActions').style.display='flex';
+  } else {
+    showPasteContent('detailBody','detailActions');
+  }
 }
 function switchMobileTab(tab){
   currentTab=tab;
@@ -856,7 +872,10 @@ function showDetailForm(ev,ds){
   });
 
   body.innerHTML=histHtml+listHtml+deadlineHtml+formHtml;
-  document.getElementById('detailActions').style.display='flex';
+  // 항상 저장/삭제 버튼 표시
+  const actions=document.getElementById('detailActions');
+  actions.style.display='flex';
+  actions.innerHTML='<button class="btn-new" onclick="openNewEvent()">+ 새 일정</button><button class="btn-save" onclick="saveEvent()">저장</button><button class="btn-delete" onclick="deleteEvent()">삭제</button>';
 
   // 수정2: 이벤트 위임으로 다른 일정 클릭 처리
   body.querySelectorAll('.other-ev-item').forEach(el=>{
@@ -886,6 +905,7 @@ async function saveEvent(){
   updateCaseDB(ev);
   if(verdictDate)checkAndAddAppealDeadline(ev);
   await saveToStorage();scheduleNotifications();renderCalendar();renderScheduleTable();openEventDetail(ev.id,ds);
+  showToast('✅ 저장되었습니다');
 }
 async function deleteEvent(){
   if(!selectedEventId)return;if(!confirm('이 일정을 삭제하시겠습니까?'))return;
@@ -971,7 +991,6 @@ async function pasteImport(uid){
     document.getElementById('caseDupPrev').innerHTML='직전 진행: <b>'+escHtml(dc.prev.date)+'</b> '+escHtml(dc.prev.type)+' '+escHtml(dc.prev.loc)+(dc.prev.status?'<br>'+escHtml(dc.prev.status):'');
     document.getElementById('caseDupModal').classList.add('show');
   }
-  alert('✅ '+added+'개 일정을 가져왔습니다!');
   switchTab('detail');
   if(uid==='mobile')closeMobileSheet();
 }
