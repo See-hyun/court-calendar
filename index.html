@@ -16,12 +16,21 @@
   ctx.lineTo(180,180-r);ctx.quadraticCurveTo(180,180,180-r,180);ctx.lineTo(r,180);
   ctx.quadraticCurveTo(0,180,0,180-r);ctx.lineTo(0,r);ctx.quadraticCurveTo(0,0,r,0);
   ctx.closePath();ctx.fillStyle='#1a1a2e';ctx.fill();
-  ctx.font='bold 28px serif';ctx.fillStyle='#c9a84c';ctx.textAlign='center';
-  ctx.fillText('재판',90,75);ctx.fillText('일정',90,108);
-  ctx.font='36px serif';ctx.fillText('⚖',90,150);
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.font='bold 42px serif';ctx.fillStyle='#c9a84c';
+  ctx.fillText('재판',90,62);
+  ctx.fillText('일정',90,110);
+  ctx.font='38px serif';ctx.fillText('⚖',90,158);
   const link=document.createElement('link');link.rel='apple-touch-icon';link.href=c.toDataURL('image/png');
   document.head.appendChild(link);
 })();
+// 모바일 알림 즉시 차단 (권한 요청 전에 실행)
+if(/Mobi|Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)){
+  if('Notification'in window&&Notification.permission==='granted'){
+    // 이미 허용된 경우 알림 전송 자체를 막기 위해 override
+    window._mobileBlocked=true;
+  }
+}
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -271,8 +280,8 @@ textarea.form-control{resize:vertical;min-height:50px;}
     <div id="syncStatus" style="font-size:0.72rem;color:rgba(255,255,255,0.4);">● 연결 중...</div>
     <div id="lastModified" style="font-size:0.68rem;color:rgba(255,255,255,0.3);"></div>
     <div class="header-actions">
-      <button class="btn-add" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);" class="btn-desktop-only" onclick="backupData()">💾 백업</button>
-      <button class="btn-add" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);" class="btn-desktop-only" onclick="document.getElementById('restoreInput').click()">📂 복원</button>
+      <button class="btn-add btn-desktop-only" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);" onclick="backupData()">💾 백업</button>
+      <button class="btn-add btn-desktop-only" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);" onclick="document.getElementById('restoreInput').click()">📂 복원</button>
       <input type="file" id="restoreInput" accept=".json" style="display:none" onchange="restoreData(event)">
       <button class="btn-add" onclick="openDDayModal()">⚠️ D-Day</button>
       <button class="btn-add" onclick="openNewEvent()">+ 새 일정</button>
@@ -420,7 +429,7 @@ textarea.form-control{resize:vertical;min-height:50px;}
   <button class="mobile-nav-btn active" onclick="scrollToCalendar()"><span class="nav-icon">📅</span>달력</button>
   <button class="mobile-nav-btn" onclick="openDDayModal()"><span class="nav-icon">⚠️</span>D-Day</button>
   <button class="mobile-nav-btn" onclick="scrollToTable()"><span class="nav-icon">📄</span>목록</button>
-  <button class="mobile-nav-btn" onclick="backupData()"><span class="nav-icon">💾</span>백업</button>
+  <button class="mobile-nav-btn" onclick="openNewEvent()"><span class="nav-icon">+</span>새일정</button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -478,7 +487,23 @@ let currentTab='detail';
 const today=new Date();
 
 function showSyncStatus(msg,color){const el=document.getElementById('syncStatus');if(el){el.textContent=msg;el.style.color=color||'rgba(255,255,255,0.4)';}}
-function showLastModified(when){const el=document.getElementById('lastModified');if(el&&when)el.textContent='최종수정: '+when;}
+function showLastModified(when){
+  const el=document.getElementById('lastModified');
+  if(!el||!when)return;
+  // 항상 YYYY-MM-DD HH:mm 형식으로 정규화
+  let display=String(when);
+  // "한국표준시" 등 긴 문자열이 오면 파싱해서 정규화
+  if(display.length>16){
+    try{
+      const d=new Date(display);
+      if(!isNaN(d)){
+        const pad=n=>String(n).padStart(2,'0');
+        display=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes());
+      }
+    }catch(e){}
+  }
+  el.textContent='최종수정: '+display;
+}
 function showToast(msg){
   const t=document.getElementById('toast');if(!t)return;
   t.textContent=msg;t.classList.add('show');
@@ -512,7 +537,9 @@ function loadLocal(){
 }
 function saveLocal(){
   const now=new Date();
-  const modTime=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  // 4번 수정: 항상 로컬 시간 기준으로 YYYY-MM-DD HH:mm 형식만 표시
+  const pad=n=>String(n).padStart(2,'0');
+  const modTime=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+pad(now.getHours())+':'+pad(now.getMinutes());
   localStorage.setItem('courtEvents',JSON.stringify(events));
   localStorage.setItem('courtCaseDB',JSON.stringify(caseDB));
   localStorage.setItem('courtDeadlines',JSON.stringify(deadlines));
@@ -526,18 +553,36 @@ function saveLocal(){
 // ════════════════════════════════════════════════════════
 function updateCaseDB(ev){
   if(!ev.caseNo)return;
-  const key=ev.caseNo.split(' ')[0]; // 본소/반소 구분 제거
+  const key=ev.caseNo.split(' ')[0];
   if(!caseDB[key]){
     caseDB[key]={caseNo:ev.caseNo,plaintiff:ev.plaintiff,defendant:ev.defendant,history:[]};
   }
-  // 중복 기일 체크 (같은 날짜+시간이면 업데이트)
   const existing=caseDB[key].history.find(h=>h.date===ev.date&&h.time===ev.time);
   if(existing){
-    existing.type=ev.type;existing.loc=cleanLoc(ev.loc);existing.status=ev.status;existing.memo=ev.memo;
+    existing.type=ev.type;existing.loc=cleanLoc(ev.loc);
+    // 3번: 진행상황 누적 (새 값이 있고 기존과 다를 때만 추가)
+    if(ev.status&&ev.status.trim()){
+      if(!existing.statusHistory)existing.statusHistory=[];
+      const lastStatus=existing.statusHistory[existing.statusHistory.length-1];
+      if(!lastStatus||lastStatus.text!==ev.status.trim()){
+        existing.statusHistory.push({text:ev.status.trim(),date:fmtDate(today)});
+      }
+      existing.status=ev.status;
+    }
+    existing.memo=ev.memo;
   }else{
-    caseDB[key].history.push({date:ev.date,time:ev.time,type:ev.type,loc:cleanLoc(ev.loc),status:ev.status||'',memo:ev.memo||'',registeredAt:fmtDate(today)});
+    const histItem={date:ev.date,time:ev.time,type:ev.type,loc:cleanLoc(ev.loc),status:ev.status||'',memo:ev.memo||'',registeredAt:fmtDate(today),statusHistory:[]};
+    if(ev.status&&ev.status.trim())histItem.statusHistory=[{text:ev.status.trim(),date:fmtDate(today)}];
+    caseDB[key].history.push(histItem);
   }
   caseDB[key].history.sort((a,b)=>a.date.localeCompare(b.date));
+}
+function deleteCaseHistory(caseKey, dateStr, timeStr){
+  if(!caseDB[caseKey])return;
+  caseDB[caseKey].history=caseDB[caseKey].history.filter(h=>!(h.date===dateStr&&h.time===timeStr));
+  if(caseDB[caseKey].history.length===0)delete caseDB[caseKey];
+  saveToStorage();
+  showToast('✅ 이력이 삭제되었습니다');
 }
 function getCaseHistory(caseNo){
   if(!caseNo)return null;
@@ -647,16 +692,21 @@ function addEv(date,time,court,caseNo,div,type,loc,plaintiff,defendant,delegatio
 // ════════════════════════════════════════════════════════
 // 알림 (PC 전용)
 // ════════════════════════════════════════════════════════
-function isMobileDevice(){return /Mobi|Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||('ontouchstart'in window&&window.innerWidth<=768);}
+function isMobileDevice(){return window._mobileBlocked||/Mobi|Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||('ontouchstart'in window&&window.innerWidth<=900);}
+// 모바일이면 앱 시작 시 알림 권한 강제 차단
+if(isMobileDevice()&&'Notification'in window&&Notification.permission==='granted'){
+  // 이미 허용된 경우라도 실제 알림 발송 막기 위해 플래그 설정
+  window._notifBlocked=true;
+}
 function initNotifications(){
-  if(isMobileDevice())return; // 모바일 완전 차단
+  if(isMobileDevice())return;
   if(!('Notification'in window))return;
   if(Notification.permission==='granted')scheduleNotifications();
   else if(Notification.permission!=='denied')
     Notification.requestPermission().then(p=>{if(p==='granted'){scheduleNotifications();sendNotif('⚖ 재판 일정 관리','브라우저 알림이 활성화되었습니다.',null);}});
 }
 function sendNotif(title,body,tag){
-  if(isMobileDevice())return; // 이중 차단
+  if(isMobileDevice()||window._notifBlocked)return;
   if(Notification.permission!=='granted')return;
   const n=new Notification(title,{body,tag:tag||('c-'+Date.now()),requireInteraction:true});
   n.onclick=()=>{window.focus();n.close();};
@@ -794,35 +844,42 @@ function selectDate(ds){
   const dayEvs=events[ds]||[];
   if(dayEvs.length>0)openEventDetail(dayEvs[0].id,ds);else openNewEventOnDate(ds);
 }
+// 현재 편집 모드 여부
+let isEditMode=false;
+
 function openEventDetail(evId,ds){
   selectedDate=ds||selectedDate;selectedEventId=evId;
   document.querySelectorAll('.cal-cell').forEach(c=>c.classList.remove('selected'));
   const cell=document.querySelector('[data-date="'+(ds||selectedDate)+'"]');if(cell)cell.classList.add('selected');
   const ev=(events[ds||selectedDate]||[]).find(e=>e.id===evId);if(!ev)return;
   currentTab='detail';
+  isEditMode=false; // 클릭하면 항상 뷰모드로 시작
   showDetailForm(ev,ds||selectedDate);
 }
-function openNewEvent(){selectedEventId=null;currentTab='detail';showDetailForm(null,selectedDate||fmtDate(today));}
-function openNewEventOnDate(ds){selectedEventId=null;currentTab='detail';showDetailForm(null,ds);}
+function openNewEvent(){selectedEventId=null;currentTab='detail';isEditMode=true;showDetailForm(null,selectedDate||fmtDate(today));}
+function openNewEventOnDate(ds){selectedEventId=null;currentTab='detail';isEditMode=true;showDetailForm(null,ds);}
 
-function showDetailForm(ev,ds){
+function buildDetailHTML(ev, ds, editMode, targetBodyId, targetActionsId){
   if(!ds)ds=fmtDate(today);
-  const d=new Date(ds);
-  document.getElementById('detailDateLabel').textContent=(d.getMonth()+1)+'월 '+d.getDate()+'일';
-  const body=document.getElementById('detailBody');
+  const isMobile=targetBodyId==='mobileDetailBody';
 
-  // 사건 이력
+  // 사건 이력 박스
   let histHtml='';
   if(ev&&ev.caseNo){
     const hist=getCaseHistory(ev.caseNo);
-    const cnt=getCaseCount(ev.caseNo,ev.date);
-    if(hist&&hist.history.length>1){
-      histHtml='<div class="case-history"><div class="case-history-title">📁 사건이력 ('+hist.history.length+'건)</div>';
+    const key=ev.caseNo.split(' ')[0];
+    if(hist&&hist.history.length>0){
+      histHtml='<div class="case-history"><div class="case-history-title" style="display:flex;justify-content:space-between;align-items:center;">📁 사건이력 ('+hist.history.length+'건)<button onclick="openCaseModal(\''+escHtml(key)+'\')" style="background:none;border:none;color:var(--gold);font-size:0.7rem;cursor:pointer;">전체보기 ▶</button></div>';
       hist.history.slice(-3).forEach(h=>{
         const isThis=h.date===ev.date&&h.time===ev.time;
-        histHtml+='<div class="case-history-item'+(isThis?' active':'')+'" style="'+(isThis?'font-weight:700;':'')+'"><span class="case-history-date">'+h.date+'</span> '+escHtml(h.type)+' '+escHtml(h.loc)+(h.status?'<br><span style="color:var(--muted)">'+escHtml(h.status)+'</span>':'')+'</div>';
+        const statusLine=h.statusHistory&&h.statusHistory.length>0
+          ?'<div style="color:var(--muted);font-size:0.67rem;margin-top:1px;">'+h.statusHistory.map(s=>'['+s.date+'] '+escHtml(s.text)).join(' → ')+'</div>'
+          :(h.status?'<div style="color:var(--muted);font-size:0.67rem;">'+escHtml(h.status)+'</div>':'');
+        histHtml+='<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);'+(isThis?'font-weight:700;':'')+'"><div><span class="case-history-date">'+h.date+'</span> <span class="badge badge-'+(h.type||'기타')+'">'+escHtml(h.type)+'</span> '+escHtml(h.loc)+statusLine+'</div>'
+          +(editMode?'<button onclick="if(confirm(\'이 이력을 삭제하시겠습니까?\'))deleteCaseHistory(\''+escHtml(key)+'\',\''+h.date+'\',\''+h.time+'\')" style="background:none;border:none;color:#c0392b;font-size:0.7rem;cursor:pointer;flex-shrink:0;margin-left:4px;">✕</button>':'')
+          +'</div>';
       });
-      if(hist.history.length>3)histHtml+='<div style="font-size:0.67rem;color:var(--muted);margin-top:3px;">... 외 '+(hist.history.length-3)+'건</div>';
+      if(hist.history.length>3)histHtml+='<div style="font-size:0.67rem;color:var(--muted);margin-top:2px;">... 외 '+(hist.history.length-3)+'건 (전체보기 클릭)</div>';
       histHtml+='</div>';
     }
   }
@@ -832,11 +889,11 @@ function showDetailForm(ev,ds){
   let listHtml='';
   if(dayEvs.length>1){
     listHtml='<div style="margin-bottom:9px;"><div class="form-label">이 날의 다른 일정</div>';
-    dayEvs.forEach(e=>{
+    dayEvs.forEach((e,idx)=>{
       const isA=e.id===(ev?ev.id:null);
       const opName=e.type==='마감'?(e.memo||'마감'):getOpponent(e);
-      // 수정2: onclick을 data 속성으로 처리하여 클릭 버그 방지
-      listHtml+='<div class="other-ev-item" data-evid="'+e.id+'" data-ds="'+ds+'" style="display:flex;align-items:center;gap:5px;padding:4px 6px;border-radius:4px;cursor:pointer;background:'+(isA?'rgba(201,168,76,0.15)':'transparent')+'">';
+      // ID 대신 인덱스 사용 (소수점 정밀도 문제 방지)
+      listHtml+='<div class="other-ev-item" data-evidx="'+idx+'" data-ds="'+escHtml(ds)+'" style="display:flex;align-items:center;gap:5px;padding:4px 6px;border-radius:4px;cursor:pointer;background:'+(isA?'rgba(201,168,76,0.15)':'transparent')+'">';
       listHtml+='<span style="font-size:0.68rem;color:var(--muted)">'+(e.time||'--:--')+'</span>';
       listHtml+='<span style="font-size:0.75rem;font-weight:'+(isA?'700':'400')+'">'+escHtml(opName)+'</span>';
       listHtml+='<span class="badge badge-'+(e.type||'기타')+'" style="margin-left:auto">'+(e.type||'기타')+'</span></div>';
@@ -844,16 +901,36 @@ function showDetailForm(ev,ds){
     listHtml+='</div><hr class="section-divider">';
   }
 
-  // 마감일 섹션
+  // 뷰 모드: 읽기 전용 텍스트
+  if(!editMode&&ev){
+    const rows=[
+      ['기일',ev.date+(ev.time?' '+ev.time:'')],
+      ['법원명',ev.court],['사건번호',ev.caseNo],['재판부',ev.div],
+      ['종류',ev.type],['기일장소',cleanLoc(ev.loc)],
+      ['원고',ev.plaintiff],['피고',ev.defendant],
+      ['위임여부',ev.delegation],['출석자',ev.attendee],
+      ['진행상황',ev.status],['메모',ev.memo],
+    ].filter(([,v])=>v);
+    let viewHtml='<div style="display:flex;flex-direction:column;gap:6px;">';
+    rows.forEach(([label,val])=>{
+      viewHtml+='<div style="display:flex;gap:8px;"><span style="font-size:0.68rem;font-weight:700;color:var(--muted);min-width:60px;flex-shrink:0;">'+label+'</span><span style="font-size:0.76rem;color:var(--ink);">'+escHtml(val)+'</span></div>';
+    });
+    viewHtml+='</div>';
+    // 편집 버튼
+    const editBtn='<button class="btn-save" style="width:100%;margin-top:12px;" onclick="enterEditMode(\''+isMobile+'\')">✏️ 수정하기</button>';
+    return{html:histHtml+listHtml+viewHtml+editBtn, showActions:false};
+  }
+
+  // 편집/신규 모드: 폼
   let deadlineHtml='';
   if(ev&&ev.type==='선고'){
     deadlineHtml=`<div class="deadline-section"><div class="deadline-title">⏰ 판결 후 마감 관리</div>
-      <div class="deadline-row"><label>판결문 송달일</label><input type="date" class="form-control" id="f_verdictDate" value="${escHtml(ev.verdictDate||'')}" style="flex:1;"></div>
-      <div style="font-size:0.68rem;color:var(--muted);margin-top:2px;">송달일 입력 시 2주 후 상소마감일이 자동 등록됩니다</div></div>`;
+      <div class="deadline-row"><label>판결문 송달일</label><input type="date" class="form-control" id="${isMobile?'m_':''}f_verdictDate" value="${escHtml(ev&&ev.verdictDate||'')}" style="flex:1;"></div>
+      <div style="font-size:0.68rem;color:var(--muted);margin-top:2px;">송달일 입력 시 2주 후 상소마감일 자동 등록</div></div>`;
   }
-
+  const pfx=isMobile?'m_':'';
   const fields=[
-    ['date','기일','date',ds||''],['time','기일시간','time',ev?ev.time:''],
+    ['date','기일','date',ev?ev.date:ds],['time','기일시간','time',ev?ev.time:''],
     ['court','법원명','text',ev?ev.court:''],['caseNo','사건번호','text',ev?ev.caseNo:''],
     ['div','재판부','text',ev?ev.div:''],['type','종류','select',ev?ev.type:'변론',['변론','조정','선고','기타']],
     ['loc','기일장소','text',ev?cleanLoc(ev.loc):''],['plaintiff','원고','text',ev?ev.plaintiff:''],
@@ -865,36 +942,84 @@ function showDetailForm(ev,ds){
   let formHtml='';
   fields.forEach(([name,label,type,val,opts])=>{
     formHtml+='<div class="form-group"><label class="form-label">'+label+'</label>';
-    if(type==='select'){formHtml+='<select class="form-control" id="f_'+name+'">';opts.forEach(o=>formHtml+='<option value="'+o+'"'+(val===o?' selected':'')+'>'+o+'</option>');formHtml+='</select>';}
-    else if(type==='textarea')formHtml+='<textarea class="form-control" id="f_'+name+'" rows="2">'+escHtml(val)+'</textarea>';
-    else formHtml+='<input class="form-control" type="'+type+'" id="f_'+name+'" value="'+escHtml(val)+'">';
+    if(type==='select'){formHtml+='<select class="form-control" id="'+pfx+'f_'+name+'">';opts.forEach(o=>formHtml+='<option value="'+o+'"'+(val===o?' selected':'')+'>'+o+'</option>');formHtml+='</select>';}
+    else if(type==='textarea')formHtml+='<textarea class="form-control" id="'+pfx+'f_'+name+'" rows="2">'+escHtml(val)+'</textarea>';
+    else formHtml+='<input class="form-control" type="'+type+'" id="'+pfx+'f_'+name+'" value="'+escHtml(val)+'">';
     formHtml+='</div>';
   });
-
-  body.innerHTML=histHtml+listHtml+deadlineHtml+formHtml;
-  // 항상 저장/삭제 버튼 표시
-  const actions=document.getElementById('detailActions');
-  actions.style.display='flex';
-  actions.innerHTML='<button class="btn-new" onclick="openNewEvent()">+ 새 일정</button><button class="btn-save" onclick="saveEvent()">저장</button><button class="btn-delete" onclick="deleteEvent()">삭제</button>';
-
-  // 수정2: 이벤트 위임으로 다른 일정 클릭 처리
-  body.querySelectorAll('.other-ev-item').forEach(el=>{
-    el.addEventListener('click',function(){
-      const eid=this.dataset.evid;
-      const dds=this.dataset.ds;
-      // ID 타입 맞추기 (숫자 또는 문자열)
-      const allEvs=events[dds]||[];
-      const target=allEvs.find(e=>String(e.id)===String(eid));
-      if(target)openEventDetail(target.id,dds);
-    });
-  });
-
-  const df=document.getElementById('f_date');if(df)df.addEventListener('change',e=>{selectedDate=e.target.value;});
-  if(window.innerWidth<=768){syncMobileDetail();openMobileSheet();}
+  return{html:histHtml+listHtml+deadlineHtml+formHtml, showActions:true};
 }
 
-async function saveEvent(){
-  const get=id=>{const el=document.getElementById('f_'+id);return el?el.value:'';};
+function enterEditMode(isMobile){
+  isEditMode=true;
+  if(isMobile==='true'||isMobile===true){
+    showMobileDetailForm();
+  } else {
+    showDetailForm(null, null, true);
+  }
+}
+
+function showDetailForm(ev, ds, forceEdit){
+  if(!ds)ds=selectedDate||fmtDate(today);
+  if(ev===null&&selectedEventId){
+    const allEvs=events[ds]||[];
+    ev=allEvs.find(e=>e.id===selectedEventId)||null;
+  }
+  const editMode=forceEdit||isEditMode||!ev;
+  const d=new Date(ds);
+  document.getElementById('detailDateLabel').textContent=(d.getMonth()+1)+'월 '+d.getDate()+'일';
+  const body=document.getElementById('detailBody');
+  const {html,showActions}=buildDetailHTML(ev,ds,editMode,'detailBody','detailActions');
+  body.innerHTML=html;
+  const actions=document.getElementById('detailActions');
+  if(showActions){
+    actions.style.display='flex';
+    actions.innerHTML='<button class="btn-new" onclick="openNewEvent()">+ 새</button><button class="btn-save" onclick="saveEvent(false)">저장</button><button class="btn-delete" onclick="deleteEvent()">삭제</button>';
+  } else {
+    actions.style.display='none';
+  }
+  body.querySelectorAll('.other-ev-item').forEach(el=>{
+    el.addEventListener('click',function(){
+      const idx=parseInt(this.dataset.evidx);
+      const dds=this.dataset.ds;
+      const dayEvsList=events[dds]||[];
+      const target=dayEvsList[idx];
+      if(target){isEditMode=false;openEventDetail(target.id,dds);}
+    });
+  });
+  const df=document.getElementById('f_date');if(df)df.addEventListener('change',e=>{selectedDate=e.target.value;});
+  if(window.innerWidth<=768){showMobileDetailForm();openMobileSheet();}
+}
+
+function showMobileDetailForm(){
+  const ds=selectedDate||fmtDate(today);
+  const ev=selectedEventId?(events[ds]||[]).find(e=>e.id===selectedEventId):null;
+  const editMode=isEditMode||!ev;
+  const body=document.getElementById('mobileDetailBody');
+  const actions=document.getElementById('mobileDetailActions');
+  const {html,showActions}=buildDetailHTML(ev,ds,editMode,'mobileDetailBody','mobileDetailActions');
+  body.innerHTML=html;
+  body.querySelectorAll('.other-ev-item').forEach(el=>{
+    el.addEventListener('click',function(){
+      const idx=parseInt(this.dataset.evidx);
+      const dds=this.dataset.ds;
+      const dayEvsList=events[dds]||[];
+      const target=dayEvsList[idx];
+      if(target){isEditMode=false;selectedEventId=target.id;selectedDate=dds;showMobileDetailForm();}
+    });
+  });
+  const mdf=document.getElementById('m_f_date');if(mdf)mdf.addEventListener('change',e=>{selectedDate=e.target.value;});
+  if(showActions){
+    actions.style.display='flex';
+    actions.innerHTML='<button class="btn-new" onclick="openNewEvent()" style="flex:1;">+ 새</button><button class="btn-save" onclick="saveEvent(true)" style="flex:1;">저장</button><button class="btn-delete" onclick="deleteMobileEvent()">삭제</button>';
+  } else {
+    actions.style.display='none';
+  }
+}
+
+async function saveEvent(isMobile){
+  const pfx=(isMobile===true||isMobile==='true')?'m_':'';
+  const get=id=>{const el=document.getElementById(pfx+'f_'+id)||document.getElementById('f_'+id);return el?el.value:'';};
   const ds=get('date')||selectedDate;if(!ds){alert('날짜를 입력하세요.');return;}
   const verdictDate=get('verdictDate')||'';
   const ev={id:selectedEventId||(Date.now()+Math.random()),date:ds,time:get('time'),court:get('court'),caseNo:get('caseNo'),div:get('div'),type:get('type'),loc:cleanLoc(get('loc')),plaintiff:get('plaintiff'),defendant:get('defendant'),delegation:get('delegation'),attendee:get('attendee'),status:get('status'),memo:get('memo'),flagType:get('flagType'),verdictDate,appealDeadline:''};
@@ -902,10 +1027,13 @@ async function saveEvent(){
   if(!events[ds])events[ds]=[];
   events[ds].push(ev);
   selectedEventId=ev.id;selectedDate=ds;
+  isEditMode=false; // 저장 후 뷰모드로 복귀
   updateCaseDB(ev);
   if(verdictDate)checkAndAddAppealDeadline(ev);
-  await saveToStorage();scheduleNotifications();renderCalendar();renderScheduleTable();openEventDetail(ev.id,ds);
+  await saveToStorage();scheduleNotifications();renderCalendar();renderScheduleTable();
   showToast('✅ 저장되었습니다');
+  if(isMobile===true||isMobile==='true'){showMobileDetailForm();}
+  else{showDetailForm(null,ds,false);}
 }
 async function deleteEvent(){
   if(!selectedEventId)return;if(!confirm('이 일정을 삭제하시겠습니까?'))return;
@@ -1088,10 +1216,10 @@ function syncMobileDetail(){
   // 이벤트 재바인딩
   body.querySelectorAll('.other-ev-item').forEach(el=>{
     el.addEventListener('click',function(){
-      const eid=this.dataset.evid;const dds=this.dataset.ds;
-      const allEvs=events[dds]||[];
-      const target=allEvs.find(e=>String(e.id)===String(eid));
-      if(target){openEventDetail(target.id,dds);syncMobileDetail();}
+      const idx=parseInt(this.dataset.evidx);
+      const dds=this.dataset.ds;
+      const target=(events[dds]||[])[idx];
+      if(target){isEditMode=false;selectedEventId=target.id;selectedDate=dds;showMobileDetailForm();}
     });
   });
   const actions=document.getElementById('mobileDetailActions');
